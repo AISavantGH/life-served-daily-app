@@ -1,7 +1,5 @@
 // In a real application, this would interact with a database like Firestore.
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-
+// For now, we'll use a mock in-memory store.
 
 export interface UserProfile {
   age: number;
@@ -12,34 +10,22 @@ export interface UserProfile {
   otherHealthGoal?: string;
 }
 
-// In a real app with authentication, you would get the current user's ID.
-// For now, we'll use a hardcoded user ID for demonstration purposes.
-const MOCK_USER_ID = "mock-user-123";
+// Mock in-memory storage
+let mockProfile: UserProfile | null = null;
+
 
 export async function getUserProfile(): Promise<UserProfile | null> {
-  try {
-    const docRef = doc(db, "userProfiles", MOCK_USER_ID);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      console.log("Fetched user profile:", docSnap.data());
-      return docSnap.data() as UserProfile;
-    } else {
-      console.log("No such document!");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    return null;
-  }
+    console.log("Fetching mock user profile...");
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log("Mock profile returned:", mockProfile);
+    return mockProfile;
 }
 
 export async function saveUserProfile(profile: UserProfile): Promise<void> {
-  try {
-    const docRef = doc(db, "userProfiles", MOCK_USER_ID);
-    await setDoc(docRef, profile, { merge: true });
-    console.log("Saved user profile for user:", MOCK_USER_ID);
-  } catch (error) {
-    console.error("Error saving user profile:", error);
-  }
+    console.log("Saving mock user profile:", profile);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    mockProfile = profile;
+    console.log("Mock profile saved.");
 }
