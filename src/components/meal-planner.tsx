@@ -34,7 +34,7 @@ import { getUserProfile, saveUserProfile, UserProfile } from "@/services/user-pr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter as TableFoot } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 
 
@@ -602,7 +602,7 @@ export function MealPlanner() {
                                             </TableRow>
                                         ))}
                                     </TableBody>
-                                    <TableFoot>
+                                    <TableFooter>
                                         <TableRow className="bg-muted/50">
                                             <TableCell colSpan={2} className="font-bold">Totals</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.calories}</TableCell>
@@ -610,7 +610,7 @@ export function MealPlanner() {
                                             <TableCell className="text-right font-bold">{plan.totals.carbs}</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.fat}</TableCell>
                                         </TableRow>
-                                    </TableFoot>
+                                    </TableFooter>
                                 </Table>
                                 <div className="p-4 bg-muted/50 rounded-lg border">
                                     <h4 className="font-semibold mb-1 text-primary">Daily Rationale</h4>
