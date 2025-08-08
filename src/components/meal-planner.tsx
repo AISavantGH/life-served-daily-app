@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { handleGenerateMealPlan, handleGenerateShoppingList } from "@/app/actions";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { GenerateShoppingListOutput } from "@/ai/flows/generate-shopping-list";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   dietaryRestrictions: z.string().min(1, {
@@ -41,15 +44,22 @@ type MealPlan = {
   mealPlan: string;
 };
 
-type ShoppingList = {
-    shoppingList: string;
-}
+type MealPlanDay = {
+  day: string;
+  meals: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+  };
+};
 
 export function MealPlanner() {
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
-  const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null);
+  const [parsedMealPlan, setParsedMealPlan] = useState<MealPlanDay[]>([]);
+  const [shoppingList, setShoppingList] = useState<GenerateShoppingListOutput | null>(null);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,15 +70,52 @@ export function MealPlanner() {
     },
   });
 
+  const parseMealPlan = (plan: string): MealPlanDay[] => {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const planDays: MealPlanDay[] = [];
+    const lines = plan.split('\n');
+    let currentDayIndex = -1;
+  
+    lines.forEach(line => {
+      const trimmedLine = line.trim();
+      if (trimmedLine.length === 0) return;
+  
+      const dayMatch = days.find(d => trimmedLine.startsWith(d));
+      if (dayMatch) {
+        currentDayIndex = days.indexOf(dayMatch);
+        if(!planDays[currentDayIndex]) {
+          planDays[currentDayIndex] = {
+            day: dayMatch,
+            meals: { breakfast: '', lunch: '', dinner: '' },
+          };
+        }
+      } else if (currentDayIndex !== -1 && planDays[currentDayIndex]) {
+        if (trimmedLine.toLowerCase().startsWith('breakfast:')) {
+            planDays[currentDayIndex].meals.breakfast = trimmedLine.substring('breakfast:'.length).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('lunch:')) {
+            planDays[currentDayIndex].meals.lunch = trimmedLine.substring('lunch:'.length).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('dinner:')) {
+            planDays[currentDayIndex].meals.dinner = trimmedLine.substring('dinner:'.length).trim();
+        }
+      }
+    });
+  
+    return planDays.filter(p => p);
+  };
+  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsMealPlanLoading(true);
     setMealPlan(null);
     setShoppingList(null);
+    setParsedMealPlan([]);
+    setCheckedItems({});
     const result = await handleGenerateMealPlan(values);
     setIsMealPlanLoading(false);
 
     if (result.success && result.data) {
       setMealPlan(result.data);
+      setParsedMealPlan(parseMealPlan(result.data.mealPlan));
       toast({
         title: "Meal Plan Generated!",
         description: "Your delicious week awaits.",
@@ -87,6 +134,7 @@ export function MealPlanner() {
 
     setIsShoppingListLoading(true);
     setShoppingList(null);
+    setCheckedItems({});
     const result = await handleGenerateShoppingList({ mealPlan: mealPlan.mealPlan });
     setIsShoppingListLoading(false);
 
@@ -104,6 +152,10 @@ export function MealPlanner() {
         });
     }
   }
+
+  const handleCheckItem = (item: string) => {
+    setCheckedItems(prev => ({ ...prev, [item]: !prev[item] }));
+  };
 
   return (
     <div className="container mx-auto max-w-3xl space-y-8">
@@ -194,7 +246,7 @@ export function MealPlanner() {
         </Card>
       )}
 
-      {mealPlan && (
+      {parsedMealPlan.length > 0 && (
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Your Personal Meal Plan</CardTitle>
@@ -203,9 +255,18 @@ export function MealPlanner() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap rounded-md border bg-muted/50 p-4 font-code text-sm">
-                {mealPlan.mealPlan}
-            </div>
+            <Accordion type="single" collapsible className="w-full">
+              {parsedMealPlan.map(plan => (
+                <AccordionItem value={plan.day} key={plan.day}>
+                  <AccordionTrigger className="text-lg font-semibold">{plan.day}</AccordionTrigger>
+                  <AccordionContent className="pl-4 space-y-2">
+                    <p><strong>Breakfast:</strong> {plan.meals.breakfast}</p>
+                    <p><strong>Lunch:</strong> {plan.meals.lunch}</p>
+                    <p><strong>Dinner:</strong> {plan.meals.dinner}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
             <Button onClick={onGenerateShoppingList} disabled={isShoppingListLoading} className="w-full">
@@ -247,10 +308,29 @@ export function MealPlanner() {
               Here's everything you need for your week of meals.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap rounded-md border bg-muted/50 p-4 font-code text-sm">
-                {shoppingList.shoppingList}
-            </div>
+          <CardContent className="space-y-4">
+            {shoppingList.shoppingList.map((category) => (
+              <div key={category.category}>
+                <h3 className="text-lg font-semibold mb-2">{category.category}</h3>
+                <div className="space-y-2">
+                  {category.items.map((item) => (
+                    <div key={item} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={item}
+                        checked={checkedItems[item] || false}
+                        onCheckedChange={() => handleCheckItem(item)}
+                      />
+                      <label
+                        htmlFor={item}
+                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedItems[item] ? 'line-through text-muted-foreground' : ''}`}
+                      >
+                        {item}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
