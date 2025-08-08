@@ -8,10 +8,11 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { GenerateMealPlanOutputSchema } from '@/ai/flows/generate-meal-plan';
 import { z } from 'genkit';
 
-const GenerateShoppingListInputSchema = z.object({
-  mealPlan: z.string().describe('The meal plan to generate a shopping list for.'),
+export const GenerateShoppingListInputSchema = z.object({
+  mealPlan: GenerateMealPlanOutputSchema.describe('The structured meal plan to generate a shopping list for.'),
 });
 export type GenerateShoppingListInput = z.infer<typeof GenerateShoppingListInputSchema>;
 
@@ -39,7 +40,7 @@ Assume standard pantry items like salt, pepper, and basic cooking oils are alrea
 Return the shopping list as an array of objects, where each object has a "category" and an array of "items".
 
 Meal Plan:
-{{{mealPlan}}}
+{{{json mealPlan}}}
 `,
 });
 
