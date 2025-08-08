@@ -163,12 +163,6 @@ export function MealPlanner() {
       .filter(Boolean)
       .join(", ");
 
-    if (!combinedDietaryRestrictions) {
-        mealPlannerForm.setError("dietaryRestrictions", { type: "manual", message: "Please specify at least one dietary restriction." });
-        setIsMealPlanLoading(false);
-        return;
-    }
-
 
     const result = await handleGenerateMealPlan({ 
         dietaryRestrictions: combinedDietaryRestrictions,
