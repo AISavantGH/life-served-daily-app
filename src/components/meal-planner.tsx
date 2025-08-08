@@ -216,6 +216,10 @@ export function MealPlanner() {
   const handleCheckItem = (item: string) => {
     setCheckedItems(prev => ({ ...prev, [item]: !prev[item] }));
   };
+  
+  const cleanupMarkdown = (text: string) => {
+    return text.replace(/\*\*/g, '').replace(/ \*/g, '').replace(/\*/g, '').replace(/•/g, '').trim();
+  }
 
   return (
     <div className="container mx-auto max-w-4xl space-y-8">
@@ -563,7 +567,7 @@ export function MealPlanner() {
              <div className="space-y-6">
                 <div>
                     <h3 className="text-2xl font-semibold text-primary mb-2">Nutritional Targets</h3>
-                    <div className="text-base text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: mealPlan.nutritionalTargets.replace(/\n/g, '<br />') }} />
+                    <div className="text-base text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: cleanupMarkdown(mealPlan.nutritionalTargets).replace(/\n/g, '<br />') }} />
                 </div>
                 <Separator />
                 <div>
@@ -588,7 +592,7 @@ export function MealPlanner() {
                                         {plan.meals.map(meal => (
                                             <TableRow key={meal.time}>
                                                 <TableCell className="font-medium">{meal.time}</TableCell>
-                                                <TableCell className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: meal.menuItems.replace(/•/g, '&bull;').replace(/\n/g, '<br />') }} />
+                                                <TableCell className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: cleanupMarkdown(meal.menuItems).replace(/\n/g, '<br />') }} />
                                                 <TableCell className="text-right">{meal.calories}</TableCell>
                                                 <TableCell className="text-right">{meal.protein}</TableCell>
                                                 <TableCell className="text-right">{meal.carbs}</TableCell>
