@@ -25,8 +25,10 @@ const GenerateMealPlanInputSchema = z.object({
     .string()
     .describe('A comma-separated list of dietary restrictions, e.g., allergies, vegetarian, gluten-free.'),
   mealPreferences: z
-    .string()
-    .describe('A comma-separated list of meal preferences, e.g., cuisine types, favorite ingredients.'),
+    .array(z.string()).optional()
+    .describe('A list of preferred cuisines.'),
+  otherMealPreference: z.string().optional().describe("Other specific meal preference provided by the user."),
+  favoriteIngredients: z.string().optional().describe("A comma-separated list of favorite ingredients."),
   userProfile: UserProfileSchema.optional().describe("The user's health profile."),
 });
 export type GenerateMealPlanInput = z.infer<typeof GenerateMealPlanInputSchema>;
@@ -71,7 +73,13 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   Dietary Restrictions: {{{dietaryRestrictions}}}
-  Meal Preferences: {{{mealPreferences}}}
+  
+  Meal Preferences:
+  {{#if mealPreferences}}
+  - Cuisines: {{#each mealPreferences}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  {{/if}}
+  {{#if otherMealPreference}}- Other Preferences: {{{otherMealPreference}}}{{/if}}
+  {{#if favoriteIngredients}}- Favorite Ingredients: {{{favoriteIngredients}}}{{/if}}
 
   Make sure to avoid unsafe food combinations by using the avoidUnsafeCombinations tool.
   The meal plan should be detailed and easy to follow.

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target, Leaf, WheatOff, MilkOff, Shell, Vegan } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target, Leaf, WheatOff, MilkOff, Shell, Vegan, Utensils } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { handleGenerateMealPlan, handleGenerateShoppingList } from "@/app/actions";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -44,15 +43,28 @@ const dietaryRestrictions = [
     { id: "nut-allergy", label: "Nut Allergy", icon: Shell },
 ] as const;
 
+const mealPreferencesList = [
+    { id: "italian", label: "Italian" },
+    { id: "mexican", label: "Mexican" },
+    { id: "asian", label: "Asian" },
+    { id: "mediterranean", label: "Mediterranean" },
+    { id: "indian", label: "Indian" },
+    { id: "american", label: "American" },
+    { id: "african", label: "African" },
+] as const;
+
 const mealPlannerFormSchema = z.object({
   dietaryRestrictions: z.array(z.string()).optional(),
   otherDietaryRestrictions: z.string().optional(),
-  mealPreferences: z.string().min(1, {
-    message: "Please list some meal preferences, e.g., 'Italian, spicy, chicken'.",
-  }),
+  mealPreferences: z.array(z.string()).optional(),
+  otherMealPreference: z.string().optional(),
+  favoriteIngredients: z.string().optional(),
 }).refine(data => (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) || (data.otherDietaryRestrictions && data.otherDietaryRestrictions.trim().length > 0), {
     message: "Please select at least one dietary restriction or specify other allergies/intolerances.",
     path: ["dietaryRestrictions"],
+}).refine(data => (data.mealPreferences && data.mealPreferences.length > 0) || (data.otherMealPreference && data.otherMealPreference.trim().length > 0) || (data.favoriteIngredients && data.favoriteIngredients.trim().length > 0), {
+    message: "Please select at least one meal preference or specify other preferences/ingredients.",
+    path: ["mealPreferences"],
 });
 
 
@@ -105,7 +117,9 @@ export function MealPlanner() {
     defaultValues: {
       dietaryRestrictions: [],
       otherDietaryRestrictions: "",
-      mealPreferences: "",
+      mealPreferences: [],
+      otherMealPreference: "",
+      favoriteIngredients: "",
     },
   });
 
@@ -204,6 +218,8 @@ export function MealPlanner() {
     const result = await handleGenerateMealPlan({ 
         dietaryRestrictions: combinedDietaryRestrictions,
         mealPreferences: values.mealPreferences,
+        otherMealPreference: values.otherMealPreference,
+        favoriteIngredients: values.favoriteIngredients,
         userProfile: userProfile ?? undefined 
     });
 
@@ -342,26 +358,82 @@ export function MealPlanner() {
                   <FormField
                     control={mealPlannerForm.control}
                     name="mealPreferences"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                          <Heart className="h-5 w-5 text-primary" />
-                          Meal Preferences
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="e.g., Italian cuisine, high-protein, quick meals, spicy food"
-                            className="resize-none"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Tell us what you love to eat!
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
+                    render={() => (
+                        <FormItem>
+                            <div className="mb-4">
+                                <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                                    <Heart className="h-5 w-5 text-primary" />
+                                    Meal Preferences
+                                </FormLabel>
+                                <FormDescription className="mt-1">
+                                    Select your favorite cuisines.
+                                </FormDescription>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {mealPreferencesList.map((item) => (
+                                    <FormField
+                                        key={item.id}
+                                        control={mealPlannerForm.control}
+                                        name="mealPreferences"
+                                        render={({ field }) => {
+                                            return (
+                                                <FormItem
+                                                    key={item.id}
+                                                    className="flex flex-row items-center space-x-3 space-y-0"
+                                                >
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(item.id)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                    ? field.onChange([...(field.value || []), item.id])
+                                                                    : field.onChange(
+                                                                        field.value?.filter(
+                                                                            (value) => value !== item.id
+                                                                        )
+                                                                    )
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal flex items-center gap-2">
+                                                        {item.label}
+                                                    </FormLabel>
+                                                </FormItem>
+                                            )
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <FormMessage />
+                        </FormItem>
                     )}
-                  />
+                />
+                <FormField
+                    control={mealPlannerForm.control}
+                    name="otherMealPreference"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Other Meal Preference (e.g., Nigerian meal plan):</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Nigerian, Ethiopian, Moroccan" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={mealPlannerForm.control}
+                    name="favoriteIngredients"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Favorite Ingredients:</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Tomatoes, Basil, Chicken" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                   <Button type="submit" disabled={isMealPlanLoading} className="w-full">
                     {isMealPlanLoading ? (
                       <>
