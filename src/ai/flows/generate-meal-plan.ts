@@ -32,7 +32,7 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateMealPlanInputSchema},
   output: {schema: GenerateMealPlanOutputSchema},
     tools: [AvoidUnsafeCombinationsTool],
-  prompt: `You are an expert nutritionist and meal planner. Generate a detailed and structured 7-day meal plan report based on the user's profile and preferences. The report must be comprehensive, informative, and encouraging.
+  prompt: `You are an expert nutritionist and meal planner. Generate a detailed and structured 7-day meal plan report based on the user's profile and preferences. The report must be comprehensive, informative, encouraging, cost-effective, and easy to prepare.
 
   **User Profile and Preferences:**
   {{#if userProfile}}
@@ -52,6 +52,10 @@ const prompt = ai.definePrompt({
     {{#if favoriteIngredients}}- Favorite Ingredients: {{{favoriteIngredients}}}{{/if}}
     {{#if dislikedIngredients}}- Disliked Ingredients: {{{dislikedIngredients}}} (Strictly avoid including these ingredients).{{/if}}
 
+  **Efficiency and Cost Instructions:**
+  1.  **Incorporate Leftovers:** Design the plan so that larger dinner portions can be used as lunch for the next day to save time and reduce waste. Clearly label when a meal is "Leftovers from last night's dinner."
+  2.  **Repeat Meals:** It is perfectly acceptable and encouraged to repeat breakfasts and lunches throughout the week to simplify preparation and shopping.
+  3.  **Budget-Friendly:** Be mindful of using cost-effective ingredients.
 
   **Instructions for the Output:**
   
