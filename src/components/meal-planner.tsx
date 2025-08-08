@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { handleGenerateMealPlan } from "@/app/actions";
+import { handleGenerateMealPlan, handleGenerateShoppingList } from "@/app/actions";
 
 const formSchema = z.object({
   dietaryRestrictions: z.string().min(1, {
@@ -41,9 +41,15 @@ type MealPlan = {
   mealPlan: string;
 };
 
+type ShoppingList = {
+    shoppingList: string;
+}
+
 export function MealPlanner() {
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null);
+  const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
+  const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,10 +61,11 @@ export function MealPlanner() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+    setIsMealPlanLoading(true);
     setMealPlan(null);
+    setShoppingList(null);
     const result = await handleGenerateMealPlan(values);
-    setIsLoading(false);
+    setIsMealPlanLoading(false);
 
     if (result.success && result.data) {
       setMealPlan(result.data);
@@ -72,6 +79,29 @@ export function MealPlanner() {
         title: "Uh oh! Something went wrong.",
         description: result.error || "There was a problem generating your meal plan.",
       });
+    }
+  }
+
+  async function onGenerateShoppingList() {
+    if (!mealPlan) return;
+
+    setIsShoppingListLoading(true);
+    setShoppingList(null);
+    const result = await handleGenerateShoppingList({ mealPlan: mealPlan.mealPlan });
+    setIsShoppingListLoading(false);
+
+    if (result.success && result.data) {
+        setShoppingList(result.data);
+        toast({
+            title: "Shopping List Ready!",
+            description: "Time to hit the grocery store.",
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: result.error || "There was a problem generating your shopping list.",
+        });
     }
   }
 
@@ -133,8 +163,8 @@ export function MealPlanner() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
+              <Button type="submit" disabled={isMealPlanLoading} className="w-full">
+                {isMealPlanLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -151,7 +181,7 @@ export function MealPlanner() {
         </CardContent>
       </Card>
 
-      {isLoading && (
+      {isMealPlanLoading && (
         <Card className="shadow-lg animate-pulse">
             <CardHeader>
                 <div className="h-6 w-3/4 rounded-md bg-muted" />
@@ -177,9 +207,51 @@ export function MealPlanner() {
                 {mealPlan.mealPlan}
             </div>
           </CardContent>
-          <CardFooter>
-            <p className="text-xs text-muted-foreground">Enjoy your meals! You can generate a new plan anytime.</p>
+          <CardFooter className="flex-col items-stretch gap-4">
+            <Button onClick={onGenerateShoppingList} disabled={isShoppingListLoading} className="w-full">
+                {isShoppingListLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Shopping List...
+                    </>
+                ) : (
+                    <>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Generate Shopping List
+                    </>
+                )}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">Enjoy your meals! You can generate a new plan anytime.</p>
           </CardFooter>
+        </Card>
+      )}
+
+      {isShoppingListLoading && (
+        <Card className="shadow-lg animate-pulse">
+            <CardHeader>
+                <div className="h-6 w-3/4 rounded-md bg-muted" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="h-4 w-full rounded-md bg-muted" />
+                <div className="h-4 w-5/6 rounded-md bg-muted" />
+                <div className="h-4 w-full rounded-md bg-muted" />
+            </CardContent>
+        </Card>
+      )}
+
+      {shoppingList && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl">Your Shopping List</CardTitle>
+            <CardDescription>
+              Here's everything you need for your week of meals.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap rounded-md border bg-muted/50 p-4 font-code text-sm">
+                {shoppingList.shoppingList}
+            </div>
+          </CardContent>
         </Card>
       )}
     </div>

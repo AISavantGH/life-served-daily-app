@@ -46,7 +46,7 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateMealPlanInputSchema},
   output: {schema: GenerateMealPlanOutputSchema},
     tools: [AvoidUnsafeCombinationsTool],
-  prompt: `You are a meal plan generator. Generate a meal plan based on the user's dietary restrictions and preferences.
+  prompt: `You are a meal plan generator. Generate a meal plan for 7 days (Monday to Sunday) based on the user's dietary restrictions and preferences. Include breakfast, lunch, and dinner for each day.
 
   Dietary Restrictions: {{{dietaryRestrictions}}}
   Meal Preferences: {{{mealPreferences}}}
