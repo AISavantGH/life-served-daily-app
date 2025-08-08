@@ -17,11 +17,13 @@ export async function generateMealPlan(input: GenerateMealPlanInput): Promise<Ge
 const AvoidUnsafeCombinationsTool = ai.defineTool({
     name: 'avoidUnsafeCombinations',
     description: 'This tool is used to avoid unsafe food combinations, ensuring the generated meal plan is safe and healthy.',
-    inputSchema: z.string().describe('A list of ingredients for the meal plan'),
+    inputSchema: z.object({
+        ingredients: z.string().describe('A comma-separated list of ingredients to check for unsafe combinations.'),
+    }),
     outputSchema: z.string().describe('A list of ingredients that do not have unsafe food combinations'),
   },
   async (input) => {
-    return input;
+    return input.ingredients;
   }
 );
 
