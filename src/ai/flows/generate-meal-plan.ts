@@ -16,6 +16,8 @@ const UserProfileSchema = z.object({
     gender: z.string().describe("User's gender"),
     activityLevel: z.string().describe("User's activity level (e.g., Sedentary, Lightly Active, Moderately Active)"),
     location: z.string().optional().describe("User's location to suggest locally available ingredients."),
+    healthGoals: z.array(z.string()).optional().describe("User's health goals (e.g., Weight Management, Increasing Energy Levels)."),
+    otherHealthGoal: z.string().optional().describe("Other specific health goal provided by the user."),
 });
 
 const GenerateMealPlanInputSchema = z.object({
@@ -62,6 +64,10 @@ const prompt = ai.definePrompt({
   - Gender: {{userProfile.gender}}
   - Activity Level: {{userProfile.activityLevel}}
   {{#if userProfile.location}}- Location: {{userProfile.location}}{{/if}}
+  {{#if userProfile.healthGoals}}
+  - Health Goals: {{#each userProfile.healthGoals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  {{/if}}
+  {{#if userProfile.otherHealthGoal}}- Other Health Goal: {{{userProfile.otherHealthGoal}}}{{/if}}
   {{/if}}
 
   Dietary Restrictions: {{{dietaryRestrictions}}}

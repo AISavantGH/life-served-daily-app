@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,11 +45,24 @@ const mealPlannerFormSchema = z.object({
   }),
 });
 
+const healthGoals = [
+    { id: "weight_loss", label: "Weight Management (Loss)" },
+    { id: "weight_gain", label: "Weight Management (Gain)" },
+    { id: "weight_maintenance", label: "Weight Management (Maintenance)" },
+    { id: "general_health", label: "Improving General Health" },
+    { id: "energy_levels", label: "Increasing Energy Levels" },
+    { id: "diabetes_management", label: "Diabetes Management" },
+    { id: "blood_pressure", label: "High Blood Pressure Management" },
+    { id: "cholesterol", label: "Cholesterol Management" },
+  ] as const;
+
 const userProfileFormSchema = z.object({
   age: z.coerce.number().min(1, "Age must be a positive number."),
   gender: z.string().min(1, "Gender is required."),
   activityLevel: z.string().min(1, "Activity level is required."),
   location: z.string().optional(),
+  healthGoals: z.array(z.string()).optional(),
+  otherHealthGoal: z.string().optional(),
 });
 
 type MealPlan = {
@@ -91,6 +104,8 @@ export function MealPlanner() {
       gender: "Female",
       activityLevel: "Moderately Active",
       location: "",
+      healthGoals: ["general_health"],
+      otherHealthGoal: "",
     },
   });
 
@@ -99,7 +114,11 @@ export function MealPlanner() {
       const profile = await getUserProfile();
       if (profile) {
         setUserProfile(profile);
-        userProfileForm.reset(profile);
+        userProfileForm.reset({
+            ...profile,
+            healthGoals: profile.healthGoals || [],
+            otherHealthGoal: profile.otherHealthGoal || ""
+        });
       }
     }
     fetchUserProfile();
@@ -292,49 +311,116 @@ export function MealPlanner() {
             </CardHeader>
             <CardContent>
                 <Form {...userProfileForm}>
-                    <form onSubmit={userProfileForm.handleSubmit(onSaveProfile)} className="space-y-4">
-                        <h3 className="text-lg font-semibold text-primary">Personal Details</h3>
-                        <FormField control={userProfileForm.control} name="age" render={({ field }) => (
-                            <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={userProfileForm.control} name="gender" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Gender</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger><SelectValue placeholder="Select your gender" /></SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Male">Male</SelectItem>
-                                        <SelectItem value="Female">Female</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
-                                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={userProfileForm.control} name="activityLevel" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Activity Level</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Sedentary">Sedentary (little or no exercise)</SelectItem>
-                                        <SelectItem value="Lightly Active">Lightly Active (light exercise/sports 1-3 days/week)</SelectItem>
-                                        <SelectItem value="Moderately Active">Moderately Active (moderate exercise/sports 3-5 days/week)</SelectItem>
-                                        <SelectItem value="Very Active">Very Active (hard exercise/sports 6-7 days a week)</SelectItem>
-                                        <SelectItem value="Super Active">Super Active (very hard exercise/sports & a physical job)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={userProfileForm.control} name="location" render={({ field }) => (
-                            <FormItem><FormLabel>Location (e.g., Nigeria, Italy):</FormLabel><FormControl><Input placeholder="e.g., Nigeria, Italy, Mexico" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
+                    <form onSubmit={userProfileForm.handleSubmit(onSaveProfile)} className="space-y-6">
+                        <div>
+                            <h3 className="text-lg font-semibold text-primary mb-2">Personal Details</h3>
+                            <div className="space-y-4">
+                                <FormField control={userProfileForm.control} name="age" render={({ field }) => (
+                                    <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={userProfileForm.control} name="gender" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Gender</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue placeholder="Select your gender" /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Male">Male</SelectItem>
+                                                <SelectItem value="Female">Female</SelectItem>
+                                                <SelectItem value="Other">Other</SelectItem>
+                                                <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={userProfileForm.control} name="activityLevel" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Activity Level</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Sedentary">Sedentary (little or no exercise)</SelectItem>
+                                                <SelectItem value="Lightly Active">Lightly Active (light exercise/sports 1-3 days/week)</SelectItem>
+                                                <SelectItem value="Moderately Active">Moderately Active (moderate exercise/sports 3-5 days/week)</SelectItem>
+                                                <SelectItem value="Very Active">Very Active (hard exercise/sports 6-7 days a week)</SelectItem>
+                                                <SelectItem value="Super Active">Super Active (very hard exercise/sports & a physical job)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={userProfileForm.control} name="location" render={({ field }) => (
+                                    <FormItem><FormLabel>Location (e.g., Nigeria, Italy):</FormLabel><FormControl><Input placeholder="e.g., Nigeria, Italy, Mexico" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </div>
+                        </div>
+
+                        <div>
+                        <h3 className="text-lg font-semibold text-primary mb-2 flex items-center gap-2">Health Goals <Target className="h-5 w-5" /></h3>
+                            <FormField
+                                control={userProfileForm.control}
+                                name="healthGoals"
+                                render={() => (
+                                    <FormItem>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {healthGoals.map((item) => (
+                                        <FormField
+                                            key={item.id}
+                                            control={userProfileForm.control}
+                                            name="healthGoals"
+                                            render={({ field }) => {
+                                            return (
+                                                <FormItem
+                                                key={item.id}
+                                                className="flex flex-row items-start space-x-3 space-y-0"
+                                                >
+                                                <FormControl>
+                                                    <Checkbox
+                                                    checked={field.value?.includes(item.id)}
+                                                    onCheckedChange={(checked) => {
+                                                        return checked
+                                                        ? field.onChange([...(field.value || []), item.id])
+                                                        : field.onChange(
+                                                            field.value?.filter(
+                                                                (value) => value !== item.id
+                                                            )
+                                                            )
+                                                    }}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                    {item.label}
+                                                </FormLabel>
+                                                </FormItem>
+                                            )
+                                            }}
+                                        />
+                                        ))}
+                                    </div>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={userProfileForm.control}
+                                name="otherHealthGoal"
+                                render={({ field }) => (
+                                    <FormItem className="mt-4">
+                                        <FormLabel>Other Health Goal:</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., Improve Gut Health, Reduce Inflammation" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+
                         <Button type="submit" disabled={isProfileSaving} className="w-full">
                             {isProfileSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Save Profile'}
                         </Button>

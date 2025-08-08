@@ -6,6 +6,8 @@ export interface UserProfile {
   gender: string;
   activityLevel: string;
   location?: string;
+  healthGoals?: string[];
+  otherHealthGoal?: string;
 }
 
 // Mock database
