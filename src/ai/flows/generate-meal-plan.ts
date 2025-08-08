@@ -39,7 +39,7 @@ const prompt = ai.definePrompt({
   - Age: {{userProfile.age}}
   - Gender: {{userProfile.gender}}
   - Activity Level: {{userProfile.activityLevel}}
-  {{#if userProfile.location}}- Location: {{userProfile.location}} (Suggest locally available ingredients if relevant){{/if}}
+  {{#if userProfile.location}}- Location: {{userProfile.location}} (Prioritize suggesting locally available ingredients for this location).{{/if}}
   - Health Goals: {{#if userProfile.healthGoals}}{{#each userProfile.healthGoals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}Not specified{{/if}}{{#if userProfile.otherHealthGoal}}, {{{userProfile.otherHealthGoal}}}{{/if}}
   {{else}}
   No specific user profile provided.
