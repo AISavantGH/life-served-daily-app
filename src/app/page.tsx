@@ -3,14 +3,17 @@ import { Logo } from '@/components/icons';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex min-h-screen w-full flex-col bg-muted/20">
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-          <div className="flex gap-2 items-center">
-            <Logo className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight font-headline">
-              Life Served Daily
-            </h1>
+        <div className="container flex h-20 items-center">
+          <div className="flex items-center gap-3">
+            <Logo className="h-8 w-8 text-primary" />
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold tracking-tight font-headline">
+                Life Served Daily
+              </h1>
+              <p className="text-sm text-muted-foreground">Your Personal Meal Planning Assistant</p>
+            </div>
           </div>
         </div>
       </header>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target, Leaf, WheatOff, MilkOff, Shell, Vegan, Utensils } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target, Leaf, WheatOff, MilkOff, Shell, Vegan, Utensils, Sprout } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ import { Separator } from "@/components/ui/separator";
 
 const dietaryRestrictions = [
     { id: "vegetarian", label: "Vegetarian", icon: Leaf },
-    { id: "vegan", label: "Vegan", icon: Vegan },
+    { id: "vegan", label: "Vegan", icon: Sprout },
     { id: "gluten-free", label: "Gluten-Free", icon: WheatOff },
     { id: "dairy-free", label: "Dairy-Free", icon: MilkOff },
     { id: "nut-allergy", label: "Nut Allergy", icon: Shell },
@@ -224,38 +224,38 @@ export function MealPlanner() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-8">
-      <Card className="shadow-lg">
+    <div className="container mx-auto max-w-4xl space-y-8">
+      <Card className="shadow-lg border-none">
         <Tabs defaultValue="meal-plan">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="meal-plan">Meal Planner</TabsTrigger>
-            <TabsTrigger value="profile">User Profile</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-12">
+            <TabsTrigger value="meal-plan" className="text-base"><Utensils className="mr-2" />Meal Planner</TabsTrigger>
+            <TabsTrigger value="profile" className="text-base"><User className="mr-2"/>User Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="meal-plan">
             <CardHeader>
-              <CardTitle className="font-headline text-2xl">Create Your Meal Plan</CardTitle>
-              <CardDescription>
-                Tell us about your needs and tastes, and we&apos;ll craft a personalized meal plan for you.
+              <CardTitle className="font-headline text-3xl">Craft Your Perfect Meal Plan</CardTitle>
+              <CardDescription className="text-base">
+                Your tastes, your needs, your week. Let&apos;s get cooking.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...mealPlannerForm}>
-                <form onSubmit={mealPlannerForm.handleSubmit(onGenerateMealPlan)} className="space-y-6">
+                <form onSubmit={mealPlannerForm.handleSubmit(onGenerateMealPlan)} className="space-y-8">
                 <FormField
                     control={mealPlannerForm.control}
                     name="dietaryRestrictions"
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                            <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                                <Ban className="h-5 w-5 text-destructive" />
+                            <FormLabel className="flex items-center gap-2 text-xl font-semibold font-headline">
+                                <Ban className="h-6 w-6 text-destructive" />
                                 Dietary Restrictions
                             </FormLabel>
-                            <FormDescription className="mt-1">
-                                Select any that apply to you.
+                            <FormDescription className="mt-1 text-base">
+                                Tell us what to avoid. Select any that apply to you.
                             </FormDescription>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           {dietaryRestrictions.map((item) => (
                             <FormField
                               key={item.id}
@@ -282,8 +282,8 @@ export function MealPlanner() {
                                         }}
                                       />
                                     </FormControl>
-                                    <FormLabel className="font-normal flex items-center gap-2">
-                                      <Icon className="h-4 w-4 text-muted-foreground" />
+                                    <FormLabel className="font-normal flex items-center gap-2 text-base">
+                                      <Icon className="h-5 w-5 text-muted-foreground" />
                                       {item.label}
                                     </FormLabel>
                                   </FormItem>
@@ -301,29 +301,30 @@ export function MealPlanner() {
                     name="otherDietaryRestrictions"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Other Allergies/Intolerances:</FormLabel>
+                            <FormLabel className="text-base">Other Allergies or Intolerances</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., soy, shellfish" {...field} />
+                                <Input placeholder="e.g., soy, shellfish, mustard" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                     />
+                  <Separator />
                   <FormField
                     control={mealPlannerForm.control}
                     name="mealPreferences"
                     render={() => (
                         <FormItem>
                             <div className="mb-4">
-                                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                                    <Heart className="h-5 w-5 text-primary" />
+                                <FormLabel className="flex items-center gap-2 text-xl font-semibold font-headline">
+                                    <Heart className="h-6 w-6 text-primary" />
                                     Meal Preferences
                                 </FormLabel>
-                                <FormDescription className="mt-1">
-                                    Select your favorite cuisines.
+                                <FormDescription className="mt-1 text-base">
+                                    Help us understand what you love to eat.
                                 </FormDescription>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 {mealPreferencesList.map((item) => (
                                     <FormField
                                         key={item.id}
@@ -349,7 +350,7 @@ export function MealPlanner() {
                                                             }}
                                                         />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal flex items-center gap-2">
+                                                    <FormLabel className="font-normal flex items-center gap-2 text-base">
                                                         {item.label}
                                                     </FormLabel>
                                                 </FormItem>
@@ -367,7 +368,7 @@ export function MealPlanner() {
                     name="otherMealPreference"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Other Meal Preference (e.g., Nigerian meal plan):</FormLabel>
+                            <FormLabel className="text-base">Other Preferred Cuisines</FormLabel>
                             <FormControl>
                                 <Input placeholder="e.g., Nigerian, Ethiopian, Moroccan" {...field} />
                             </FormControl>
@@ -380,24 +381,27 @@ export function MealPlanner() {
                     name="favoriteIngredients"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Favorite Ingredients:</FormLabel>
+                            <FormLabel className="text-base">Favorite Ingredients</FormLabel>
                             <FormControl>
                                 <Input placeholder="e.g., Tomatoes, Basil, Chicken" {...field} />
                             </FormControl>
+                            <FormDescription>
+                                List some ingredients you'd love for us to include.
+                            </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                  <Button type="submit" disabled={isMealPlanLoading} className="w-full">
+                  <Button type="submit" size="lg" disabled={isMealPlanLoading} className="w-full text-lg">
                     {isMealPlanLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Generating Your Plan...
                       </>
                     ) : (
                        <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Generate Meal Plan
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        Generate My Meal Plan
                        </>
                     )}
                   </Button>
@@ -407,23 +411,23 @@ export function MealPlanner() {
           </TabsContent>
           <TabsContent value="profile">
             <CardHeader>
-                <CardTitle className="font-headline text-2xl flex items-center gap-2">Your Health Profile 🍎</CardTitle>
-                <CardDescription>
-                    Provide your details to help us create a more personalized meal plan.
+                <CardTitle className="font-headline text-3xl flex items-center gap-3">Your Health Profile</CardTitle>
+                <CardDescription className="text-base">
+                    This information helps us create a highly personalized and effective meal plan for you.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...userProfileForm}>
-                    <form onSubmit={userProfileForm.handleSubmit(onSaveProfile)} className="space-y-6">
+                    <form onSubmit={userProfileForm.handleSubmit(onSaveProfile)} className="space-y-8">
                         <div>
-                            <h3 className="text-lg font-semibold text-primary mb-2">Personal Details</h3>
+                            <h3 className="text-xl font-semibold font-headline text-primary mb-4 flex items-center gap-2"><User /> Personal Details</h3>
                             <div className="space-y-4">
                                 <FormField control={userProfileForm.control} name="age" render={({ field }) => (
-                                    <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel className="text-base">Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={userProfileForm.control} name="gender" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Gender</FormLabel>
+                                        <FormLabel className="text-base">Gender</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select your gender" /></SelectTrigger>
@@ -440,7 +444,7 @@ export function MealPlanner() {
                                 )} />
                                 <FormField control={userProfileForm.control} name="activityLevel" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Activity Level</FormLabel>
+                                        <FormLabel className="text-base">Activity Level</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
@@ -457,13 +461,13 @@ export function MealPlanner() {
                                     </FormItem>
                                 )} />
                                 <FormField control={userProfileForm.control} name="location" render={({ field }) => (
-                                    <FormItem><FormLabel>Location (e.g., Nigeria, Italy):</FormLabel><FormControl><Input placeholder="e.g., Nigeria, Italy, Mexico" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel className="text-base">Location (e.g., Nigeria, Italy)</FormLabel><FormControl><Input placeholder="Suggests locally available ingredients" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                         </div>
-
+                        <Separator />
                         <div>
-                        <h3 className="text-lg font-semibold text-primary mb-2 flex items-center gap-2">Health Goals <Target className="h-5 w-5" /></h3>
+                        <h3 className="text-xl font-semibold font-headline text-primary mb-4 flex items-center gap-2"><Target className="h-6 w-6" />Health Goals</h3>
                             <FormField
                                 control={userProfileForm.control}
                                 name="healthGoals"
@@ -495,7 +499,7 @@ export function MealPlanner() {
                                                     }}
                                                     />
                                                 </FormControl>
-                                                <FormLabel className="font-normal">
+                                                <FormLabel className="font-normal text-base">
                                                     {item.label}
                                                 </FormLabel>
                                                 </FormItem>
@@ -513,7 +517,7 @@ export function MealPlanner() {
                                 name="otherHealthGoal"
                                 render={({ field }) => (
                                     <FormItem className="mt-4">
-                                        <FormLabel>Other Health Goal:</FormLabel>
+                                        <FormLabel className="text-base">Other Health Goal</FormLabel>
                                         <FormControl>
                                             <Input placeholder="e.g., Improve Gut Health, Reduce Inflammation" {...field} />
                                         </FormControl>
@@ -524,8 +528,8 @@ export function MealPlanner() {
                         </div>
 
 
-                        <Button type="submit" disabled={isProfileSaving} className="w-full">
-                            {isProfileSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Save Profile'}
+                        <Button type="submit" size="lg" disabled={isProfileSaving} className="w-full text-lg">
+                            {isProfileSaving ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Saving Profile...</> : 'Save Profile'}
                         </Button>
                     </form>
                 </Form>
@@ -535,39 +539,45 @@ export function MealPlanner() {
       </Card>
 
       {isMealPlanLoading && (
-        <Card className="shadow-lg animate-pulse">
+        <Card className="shadow-lg w-full">
             <CardHeader>
-                <div className="h-6 w-3/4 rounded-md bg-muted" />
+                <div className="h-8 w-3/4 rounded-md bg-muted" />
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="h-4 w-full rounded-md bg-muted" />
-                <div className="h-4 w-5/6 rounded-md bg-muted" />
-                <div className="h-4 w-full rounded-md bg-muted" />
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <div className="h-4 w-1/4 rounded-md bg-muted" />
+                    <div className="h-4 w-full rounded-md bg-muted" />
+                    <div className="h-4 w-5/6 rounded-md bg-muted" />
+                </div>
+                 <div className="space-y-2">
+                    <div className="h-6 w-1/3 rounded-md bg-muted" />
+                    <div className="h-24 w-full rounded-md bg-muted" />
+                </div>
             </CardContent>
         </Card>
       )}
 
       {mealPlan && (
-        <Card className="shadow-lg">
+        <Card className="shadow-lg w-full">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">{mealPlan.title}</CardTitle>
-            <CardDescription>
+            <CardTitle className="font-headline text-3xl">{mealPlan.title}</CardTitle>
+            <CardDescription className="text-base">
               {mealPlan.summary}
             </CardDescription>
           </CardHeader>
           <CardContent>
              <div className="space-y-6">
                 <div>
-                    <h3 className="text-xl font-semibold text-primary mb-2">Nutritional Targets</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{mealPlan.nutritionalTargets}</p>
+                    <h3 className="text-2xl font-semibold font-headline text-primary mb-2">Nutritional Targets</h3>
+                    <p className="text-base text-muted-foreground whitespace-pre-wrap">{mealPlan.nutritionalTargets}</p>
                 </div>
                 <Separator />
                 <div>
-                    <h3 className="text-xl font-semibold text-primary mb-2">Your 7-Day Plan</h3>
-                     <Accordion type="single" collapsible className="w-full">
+                    <h3 className="text-2xl font-semibold font-headline text-primary mb-2">Your 7-Day Plan</h3>
+                     <Accordion type="single" collapsible className="w-full" defaultValue={mealPlan.mealPlan[0]?.day}>
                         {mealPlan.mealPlan.map(plan => (
                             <AccordionItem value={plan.day} key={plan.day}>
-                            <AccordionTrigger className="text-lg font-semibold">{plan.day}</AccordionTrigger>
+                            <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline">{plan.day}</AccordionTrigger>
                             <AccordionContent className="pl-2 space-y-4">
                                 <Table>
                                     <TableHeader>
@@ -593,7 +603,7 @@ export function MealPlanner() {
                                         ))}
                                     </TableBody>
                                     <TableFoot>
-                                        <TableRow>
+                                        <TableRow className="bg-muted/50">
                                             <TableCell colSpan={2} className="font-bold">Totals</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.calories}</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.protein}</TableCell>
@@ -602,8 +612,8 @@ export function MealPlanner() {
                                         </TableRow>
                                     </TableFoot>
                                 </Table>
-                                <div className="p-4 bg-muted/50 rounded-lg">
-                                    <h4 className="font-semibold mb-1">Why this works for you:</h4>
+                                <div className="p-4 bg-muted/50 rounded-lg border">
+                                    <h4 className="font-semibold mb-1 text-primary">Daily Rationale</h4>
                                     <p className="text-sm text-muted-foreground">{plan.dailyRationale}</p>
                                 </div>
                             </AccordionContent>
@@ -613,16 +623,16 @@ export function MealPlanner() {
                 </div>
              </div>
           </CardContent>
-          <CardFooter className="flex-col items-stretch gap-4">
-            <Button onClick={onGenerateShoppingList} disabled={isShoppingListLoading} className="w-full">
+          <CardFooter className="flex-col items-stretch gap-4 p-6">
+            <Button onClick={onGenerateShoppingList} size="lg" disabled={isShoppingListLoading} className="w-full text-lg">
                 {isShoppingListLoading ? (
                     <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Creating Shopping List...
                     </>
                 ) : (
                     <>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        <ShoppingCart className="mr-2 h-5 w-5" />
                         Generate Shopping List
                     </>
                 )}
@@ -633,9 +643,9 @@ export function MealPlanner() {
       )}
 
       {isShoppingListLoading && (
-        <Card className="shadow-lg animate-pulse">
+        <Card className="shadow-lg w-full animate-pulse">
             <CardHeader>
-                <div className="h-6 w-3/4 rounded-md bg-muted" />
+                <div className="h-8 w-3/4 rounded-md bg-muted" />
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="h-4 w-full rounded-md bg-muted" />
@@ -646,28 +656,29 @@ export function MealPlanner() {
       )}
 
       {shoppingList && (
-        <Card className="shadow-lg">
+        <Card className="shadow-lg w-full">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Your Shopping List</CardTitle>
-            <CardDescription>
-              Here's everything you need for your week of meals.
+            <CardTitle className="font-headline text-3xl flex items-center gap-3"><ShoppingCart/> Your Shopping List</CardTitle>
+            <CardDescription className="text-base">
+              Here&apos;s everything you need for your week of delicious meals. Check them off as you shop!
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {shoppingList.shoppingList.map((category) => (
               <div key={category.category}>
-                <h3 className="text-lg font-semibold mb-2">{category.category}</h3>
-                <div className="space-y-2">
+                <h3 className="text-xl font-semibold font-headline mb-3 border-b pb-2">{category.category}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                   {category.items.map((item) => (
-                    <div key={item} className="flex items-center space-x-2">
+                    <div key={item} className="flex items-center space-x-3">
                       <Checkbox
                         id={item}
                         checked={checkedItems[item] || false}
                         onCheckedChange={() => handleCheckItem(item)}
+                        className="h-5 w-5"
                       />
                       <label
                         htmlFor={item}
-                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedItems[item] ? 'line-through text-muted-foreground' : ''}`}
+                        className={`text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedItems[item] ? 'line-through text-muted-foreground' : ''}`}
                       >
                         {item}
                       </label>

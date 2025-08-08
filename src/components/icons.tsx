@@ -1,5 +1,5 @@
-import { UtensilsCrossed, type LucideProps } from 'lucide-react';
+import { Utensils, type LucideProps } from 'lucide-react';
 
 export const Logo = (props: LucideProps) => (
-  <UtensilsCrossed {...props} />
+  <Utensils {...props} />
 );
