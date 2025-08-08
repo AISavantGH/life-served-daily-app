@@ -16,7 +16,24 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.google.com',
+      }
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "img-src 'self' https://*.vscode-cdn.net https://*.googleusercontent.com https://lh3.google.com data: blob: https://placehold.co;",
+          },
+        ],
+      },
+    ]
   },
 };
 
