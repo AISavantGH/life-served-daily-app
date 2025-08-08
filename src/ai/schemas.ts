@@ -65,9 +65,14 @@ export const GenerateShoppingListInputSchema = z.object({
 });
 export type GenerateShoppingListInput = z.infer<typeof GenerateShoppingListInputSchema>;
 
+const ShoppingListItemSchema = z.object({
+    name: z.string().describe("The name of the shopping list item."),
+    link: z.string().url().optional().describe("An affiliate link to purchase the item online."),
+});
+
 const ShoppingListCategorySchema = z.object({
   category: z.string().describe("The category of the shopping list items (e.g., 'Produce', 'Dairy')."),
-  items: z.array(z.string()).describe("The items in this category."),
+  items: z.array(ShoppingListItemSchema).describe("The items in this category."),
 });
 
 export const GenerateShoppingListOutputSchema = z.object({

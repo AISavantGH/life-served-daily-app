@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BarChart, Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils, Lightbulb, TrendingUp, ThumbsDown } from "lucide-react";
+import { BarChart, Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils, Lightbulb, TrendingUp, ThumbsDown, Link as LinkIcon } from "lucide-react";
 import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
@@ -263,8 +263,8 @@ export function MealPlanner() {
     }
   }
 
-  const handleCheckItem = (item: string) => {
-    setCheckedItems(prev => ({ ...prev, [item]: !prev[item] }));
+  const handleCheckItem = (itemName: string) => {
+    setCheckedItems(prev => ({ ...prev, [itemName]: !prev[itemName] }));
   };
   
   const cleanupMarkdown = (text: string) => {
@@ -842,19 +842,24 @@ export function MealPlanner() {
                 <h3 className="text-xl font-semibold mb-3 border-b pb-2">{category.category}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                   {category.items.map((item) => (
-                    <div key={item} className="flex items-center space-x-3">
+                    <div key={item.name} className="flex items-center space-x-3">
                       <Checkbox
-                        id={item}
-                        checked={checkedItems[item] || false}
-                        onCheckedChange={() => handleCheckItem(item)}
+                        id={item.name}
+                        checked={checkedItems[item.name] || false}
+                        onCheckedChange={() => handleCheckItem(item.name)}
                         className="h-5 w-5"
                       />
                       <label
-                        htmlFor={item}
-                        className={`text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedItems[item] ? 'line-through text-muted-foreground' : ''}`}
+                        htmlFor={item.name}
+                        className={`text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedItems[item.name] ? 'line-through text-muted-foreground' : ''}`}
                       >
-                        {item}
+                        {item.name}
                       </label>
+                      {item.link && (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                            <LinkIcon className="h-4 w-4" />
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>

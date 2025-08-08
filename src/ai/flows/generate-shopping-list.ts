@@ -16,10 +16,12 @@ const prompt = ai.definePrompt({
   name: 'generateShoppingListPrompt',
   input: { schema: GenerateShoppingListInputSchema },
   output: { schema: GenerateShoppingListOutputSchema },
-  prompt: `You are a shopping list generator. Based on the following meal plan, create a comprehensive shopping list.
-Organize the list by category (e.g., Produce, Dairy, Meat, Pantry, Spices, etc.) to make shopping easier.
-Assume standard pantry items like salt, pepper, and basic cooking oils are already available and don't include them unless specified for a particular recipe.
-Return the shopping list as an array of objects, where each object has a "category" and an array of "items".
+  prompt: `You are a shopping list generator with affiliate marketing integration. Based on the following meal plan, create a comprehensive shopping list.
+
+1.  **Organize by Category:** Group items by category (e.g., Produce, Dairy, Meat, Pantry, Spices, etc.) to make shopping easier.
+2.  **Generate Affiliate Links:** For each item, provide a plausible affiliate link to an online grocery store (e.g., a search query link to instacart.com or amazon.com/fresh).
+3.  **Exclude Pantry Staples:** Assume standard pantry items like salt, pepper, and basic cooking oils are already available and don't include them unless specified for a particular recipe.
+4.  **Format Output:** Return the list as an array of objects, where each object has a "category" and an array of "items". Each item object should have a "name" and an affiliate "link".
 
 Meal Plan:
 {{{json mealPlan}}}
