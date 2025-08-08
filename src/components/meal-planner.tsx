@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart, Check, User, Target, Leaf, WheatOff, MilkOff, Shell, Vegan, Utensils, Sprout } from "lucide-react";
+import { Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -196,12 +196,7 @@ export function MealPlanner() {
     setShoppingList(null);
     setCheckedItems({});
 
-    const mealPlanText = mealPlan.mealPlan.map(day => 
-      `${day.day}:\n${day.meals.map(meal => `${meal.time} - ${meal.menuItems}`).join('\n')}`
-    ).join('\n\n');
-
-
-    const result = await handleGenerateShoppingList({ mealPlan: mealPlanText });
+    const result = await handleGenerateShoppingList({ mealPlan });
     setIsShoppingListLoading(false);
 
     if (result.success && result.data) {
@@ -233,7 +228,7 @@ export function MealPlanner() {
           </TabsList>
           <TabsContent value="meal-plan">
             <CardHeader>
-              <CardTitle className="text-3xl">Craft Your Perfect Meal Plan</CardTitle>
+              <CardTitle className="text-3xl font-headline">Craft Your Perfect Meal Plan</CardTitle>
               <CardDescription className="text-base">
                 Your tastes, your needs, your week. Let&apos;s get cooking.
               </CardDescription>
@@ -392,7 +387,7 @@ export function MealPlanner() {
                         </FormItem>
                     )}
                 />
-                  <Button type="submit" size="lg" disabled={isMealPlanLoading} className="w-full text-lg">
+                  <Button type="submit" size="lg" disabled={isMealPlanLoading || !mealPlannerForm.formState.isValid} className="w-full text-lg">
                     {isMealPlanLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -411,7 +406,7 @@ export function MealPlanner() {
           </TabsContent>
           <TabsContent value="profile">
             <CardHeader>
-                <CardTitle className="text-3xl flex items-center gap-3">Your Health Profile</CardTitle>
+                <CardTitle className="text-3xl flex items-center gap-3 font-headline">Your Health Profile</CardTitle>
                 <CardDescription className="text-base">
                     This information helps us create a highly personalized and effective meal plan for you.
                 </CardDescription>
@@ -541,17 +536,17 @@ export function MealPlanner() {
       {isMealPlanLoading && (
         <Card className="w-full">
             <CardHeader>
-                <div className="h-8 w-3/4 rounded-md bg-muted" />
+                <div className="h-8 w-3/4 rounded-md bg-muted animate-pulse" />
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-2">
-                    <div className="h-4 w-1/4 rounded-md bg-muted" />
-                    <div className="h-4 w-full rounded-md bg-muted" />
-                    <div className="h-4 w-5/6 rounded-md bg-muted" />
+                    <div className="h-4 w-1/4 rounded-md bg-muted animate-pulse" />
+                    <div className="h-4 w-full rounded-md bg-muted animate-pulse" />
+                    <div className="h-4 w-5/6 rounded-md bg-muted animate-pulse" />
                 </div>
                  <div className="space-y-2">
-                    <div className="h-6 w-1/3 rounded-md bg-muted" />
-                    <div className="h-24 w-full rounded-md bg-muted" />
+                    <div className="h-6 w-1/3 rounded-md bg-muted animate-pulse" />
+                    <div className="h-24 w-full rounded-md bg-muted animate-pulse" />
                 </div>
             </CardContent>
         </Card>
@@ -560,7 +555,7 @@ export function MealPlanner() {
       {mealPlan && (
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-3xl">{mealPlan.title}</CardTitle>
+            <CardTitle className="text-3xl font-headline">{mealPlan.title}</CardTitle>
             <CardDescription className="text-base">
               {mealPlan.summary}
             </CardDescription>
@@ -569,7 +564,7 @@ export function MealPlanner() {
              <div className="space-y-6">
                 <div>
                     <h3 className="text-2xl font-semibold text-primary mb-2">Nutritional Targets</h3>
-                    <p className="text-base text-muted-foreground whitespace-pre-wrap">{mealPlan.nutritionalTargets}</p>
+                    <div className="text-base text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: mealPlan.nutritionalTargets.replace(/\n/g, '<br />') }} />
                 </div>
                 <Separator />
                 <div>
@@ -594,7 +589,7 @@ export function MealPlanner() {
                                         {plan.meals.map(meal => (
                                             <TableRow key={meal.time}>
                                                 <TableCell className="font-medium">{meal.time}</TableCell>
-                                                <TableCell className="whitespace-pre-wrap">{meal.menuItems}</TableCell>
+                                                <TableCell className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: meal.menuItems.replace(/•/g, '&bull;').replace(/\n/g, '<br />') }} />
                                                 <TableCell className="text-right">{meal.calories}</TableCell>
                                                 <TableCell className="text-right">{meal.protein}</TableCell>
                                                 <TableCell className="text-right">{meal.carbs}</TableCell>
@@ -658,7 +653,7 @@ export function MealPlanner() {
       {shoppingList && (
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-3xl flex items-center gap-3"><ShoppingCart/> Your Shopping List</CardTitle>
+            <CardTitle className="text-3xl flex items-center gap-3 font-headline"><ShoppingCart/> Your Shopping List</CardTitle>
             <CardDescription className="text-base">
               Here&apos;s everything you need for your week of delicious meals. Check them off as you shop!
             </CardDescription>
