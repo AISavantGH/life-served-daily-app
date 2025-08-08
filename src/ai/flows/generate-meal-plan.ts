@@ -11,6 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+const UserProfileSchema = z.object({
+    name: z.string().describe("User's name"),
+    age: z.number().describe("User's age"),
+    weight: z.number().describe("User's weight in kilograms"),
+    height: z.number().describe("User's height in centimeters"),
+    healthGoals: z.string().describe("User's health goals (e.g., lose weight, gain muscle, maintain)"),
+});
+
 const GenerateMealPlanInputSchema = z.object({
   dietaryRestrictions: z
     .string()
@@ -18,6 +26,7 @@ const GenerateMealPlanInputSchema = z.object({
   mealPreferences: z
     .string()
     .describe('A comma-separated list of meal preferences, e.g., cuisine types, favorite ingredients.'),
+  userProfile: UserProfileSchema.optional().describe("The user's health profile."),
 });
 export type GenerateMealPlanInput = z.infer<typeof GenerateMealPlanInputSchema>;
 
@@ -47,6 +56,15 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateMealPlanOutputSchema},
     tools: [AvoidUnsafeCombinationsTool],
   prompt: `You are a meal plan generator. Generate a meal plan for 7 days (Monday to Sunday) based on the user's dietary restrictions and preferences. Include breakfast, lunch, and dinner for each day.
+
+  {{#if userProfile}}
+  Here is the user's profile for more personalization:
+  - Name: {{userProfile.name}}
+  - Age: {{userProfile.age}}
+  - Weight: {{userProfile.weight}} kg
+  - Height: {{userProfile.height}} cm
+  - Health Goals: {{userProfile.healthGoals}}
+  {{/if}}
 
   Dietary Restrictions: {{{dietaryRestrictions}}}
   Meal Preferences: {{{mealPreferences}}}
