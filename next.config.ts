@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  allowedDevOrigins: ['https://9000-firebase-studio-1754540236720.cluster-ux5mmlia3zhhask7riihruxydo.cloudworkstations.dev'],
   async headers() {
     return [
       {
@@ -31,6 +32,18 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: "img-src 'self' https://*.vscode-cdn.net https://*.googleusercontent.com https://lh3.google.com data: blob: https://placehold.co;",
           },
+          {
+            key: 'X-Forwarded-For',
+            value: ':remote-addr',
+          },
+          {
+            key: 'X-Forwarded-Proto',
+            value: 'https',
+          },
+          {
+            key: 'X-Forwarded-Host',
+            value: ':host',
+          }
         ],
       },
     ]
