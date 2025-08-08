@@ -2,11 +2,10 @@
 // In a real application, this would interact with a database like Firestore.
 
 export interface UserProfile {
-  name: string;
   age: number;
-  weight: number;
-  height: number;
-  healthGoals: string;
+  gender: string;
+  activityLevel: string;
+  location?: string;
 }
 
 // Mock database

@@ -12,11 +12,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const UserProfileSchema = z.object({
-    name: z.string().describe("User's name"),
     age: z.number().describe("User's age"),
-    weight: z.number().describe("User's weight in kilograms"),
-    height: z.number().describe("User's height in centimeters"),
-    healthGoals: z.string().describe("User's health goals (e.g., lose weight, gain muscle, maintain)"),
+    gender: z.string().describe("User's gender"),
+    activityLevel: z.string().describe("User's activity level (e.g., Sedentary, Lightly Active, Moderately Active)"),
+    location: z.string().optional().describe("User's location to suggest locally available ingredients."),
 });
 
 const GenerateMealPlanInputSchema = z.object({
@@ -59,11 +58,10 @@ const prompt = ai.definePrompt({
 
   {{#if userProfile}}
   Here is the user's profile for more personalization:
-  - Name: {{userProfile.name}}
   - Age: {{userProfile.age}}
-  - Weight: {{userProfile.weight}} kg
-  - Height: {{userProfile.height}} cm
-  - Health Goals: {{userProfile.healthGoals}}
+  - Gender: {{userProfile.gender}}
+  - Activity Level: {{userProfile.activityLevel}}
+  {{#if userProfile.location}}- Location: {{userProfile.location}}{{/if}}
   {{/if}}
 
   Dietary Restrictions: {{{dietaryRestrictions}}}
