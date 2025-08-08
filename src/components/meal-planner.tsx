@@ -43,14 +43,14 @@ import { Progress } from "@/components/ui/progress";
 
 
 const dietaryRestrictions = [
-    { id: "vegetarian", label: "Vegetarian", icon: Leaf },
-    { id: "vegan", label: "Vegan", icon: Sprout },
     { id: "gluten-free", label: "Gluten-Free", icon: WheatOff },
     { id: "dairy-free", label: "Dairy-Free", icon: MilkOff },
     { id: "nut-allergy", label: "Nut Allergy", icon: Shell },
 ] as const;
 
 const mealPreferencesList = [
+    { id: "vegetarian", label: "Vegetarian", icon: Leaf },
+    { id: "vegan", label: "Vegan", icon: Sprout },
     { id: "italian", label: "Italian" },
     { id: "mexican", label: "Mexican" },
     { id: "asian", label: "Asian" },
@@ -66,11 +66,8 @@ const mealPlannerFormSchema = z.object({
   mealPreferences: z.array(z.string()).optional(),
   otherMealPreference: z.string().optional(),
   favoriteIngredients: z.string().optional(),
-}).refine(data => (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) || (data.otherDietaryRestrictions && data.otherDietaryRestrictions.trim().length > 0), {
-    message: "Please select at least one dietary restriction or specify other allergies/intolerances.",
-    path: ["dietaryRestrictions"],
-}).refine(data => (data.mealPreferences && data.mealPreferences.length > 0) || (data.otherMealPreference && data.otherMealPreference.trim().length > 0) || (data.favoriteIngredients && data.favoriteIngredients.trim().length > 0), {
-    message: "Please select at least one meal preference or specify other preferences/ingredients.",
+}).refine(data => (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) || (data.otherDietaryRestrictions && data.otherDietaryRestrictions.trim().length > 0) || (data.mealPreferences && data.mealPreferences.length > 0) || (data.otherMealPreference && data.otherMealPreference.trim().length > 0) || (data.favoriteIngredients && data.favoriteIngredients.trim().length > 0), {
+    message: "Please select at least one preference or restriction.",
     path: ["mealPreferences"],
 });
 
@@ -291,16 +288,101 @@ export function MealPlanner() {
                 <form onSubmit={mealPlannerForm.handleSubmit(onGenerateMealPlan)} className="space-y-8">
                 <FormField
                     control={mealPlannerForm.control}
+                    name="mealPreferences"
+                    render={() => (
+                        <FormItem>
+                            <div className="mb-4">
+                                <FormLabel className="flex items-center gap-2 text-xl font-semibold">
+                                    <Heart className="h-6 w-6 text-primary" />
+                                    Meal Preferences
+                                </FormLabel>
+                                <FormDescription className="mt-1 text-base">
+                                    Help us understand what you love to eat. Select your dietary profile and preferred cuisines.
+                                </FormDescription>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {mealPreferencesList.map((item) => (
+                                    <FormField
+                                        key={item.id}
+                                        control={mealPlannerForm.control}
+                                        name="mealPreferences"
+                                        render={({ field }) => {
+                                            const Icon = item.icon;
+                                            return (
+                                                <FormItem
+                                                    key={item.id}
+                                                    className="flex flex-row items-center space-x-3 space-y-0"
+                                                >
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(item.id)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                    ? field.onChange([...(field.value || []), item.id])
+                                                                    : field.onChange(
+                                                                        field.value?.filter(
+                                                                            (value) => value !== item.id
+                                                                        )
+                                                                    )
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal flex items-center gap-2 text-base">
+                                                      {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
+                                                      {item.label}
+                                                    </FormLabel>
+                                                </FormItem>
+                                            )
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={mealPlannerForm.control}
+                    name="otherMealPreference"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-base">Other Preferred Cuisines</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Nigerian, Ethiopian, Moroccan" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={mealPlannerForm.control}
+                    name="favoriteIngredients"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-base">Favorite Ingredients</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Tomatoes, Basil, Chicken" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                                List some ingredients you'd love for us to include.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                  <Separator />
+                  <FormField
+                    control={mealPlannerForm.control}
                     name="dietaryRestrictions"
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
                             <FormLabel className="flex items-center gap-2 text-xl font-semibold">
                                 <Ban className="h-6 w-6 text-destructive" />
-                                Dietary Profile & Restrictions
+                                Allergies & Intolerances
                             </FormLabel>
                             <FormDescription className="mt-1 text-base">
-                                Let us know your dietary needs. Select all that apply.
+                                Let us know what to avoid. Select all that apply.
                             </FormDescription>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -357,89 +439,6 @@ export function MealPlanner() {
                         </FormItem>
                     )}
                     />
-                  <Separator />
-                  <FormField
-                    control={mealPlannerForm.control}
-                    name="mealPreferences"
-                    render={() => (
-                        <FormItem>
-                            <div className="mb-4">
-                                <FormLabel className="flex items-center gap-2 text-xl font-semibold">
-                                    <Heart className="h-6 w-6 text-primary" />
-                                    Meal Preferences
-                                </FormLabel>
-                                <FormDescription className="mt-1 text-base">
-                                    Help us understand what you love to eat.
-                                </FormDescription>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {mealPreferencesList.map((item) => (
-                                    <FormField
-                                        key={item.id}
-                                        control={mealPlannerForm.control}
-                                        name="mealPreferences"
-                                        render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                    key={item.id}
-                                                    className="flex flex-row items-center space-x-3 space-y-0"
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(item.id)}
-                                                            onCheckedChange={(checked) => {
-                                                                return checked
-                                                                    ? field.onChange([...(field.value || []), item.id])
-                                                                    : field.onChange(
-                                                                        field.value?.filter(
-                                                                            (value) => value !== item.id
-                                                                        )
-                                                                    )
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal flex items-center gap-2 text-base">
-                                                        {item.label}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={mealPlannerForm.control}
-                    name="otherMealPreference"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-base">Other Preferred Cuisines</FormLabel>
-                            <FormControl>
-                                <Input placeholder="e.g., Nigerian, Ethiopian, Moroccan" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={mealPlannerForm.control}
-                    name="favoriteIngredients"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-base">Favorite Ingredients</FormLabel>
-                            <FormControl>
-                                <Input placeholder="e.g., Tomatoes, Basil, Chicken" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                                List some ingredients you'd love for us to include.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
                   <Button type="submit" size="lg" disabled={isMealPlanLoading || !mealPlannerForm.formState.isValid} className="w-full text-lg">
                     {isMealPlanLoading ? (
                       <>
