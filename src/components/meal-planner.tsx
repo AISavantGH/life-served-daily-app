@@ -448,7 +448,7 @@ export function MealPlanner() {
                                                 <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Sedentary">Sedentary (little or no exercise)</SelectItem>
+                                                <SelectItem value="Sedentary">Sedentary (little or no exercise, e.g., desk job)</SelectItem>
                                                 <SelectItem value="Lightly Active">Lightly Active (light exercise/sports 1-3 days/week)</SelectItem>
                                                 <SelectItem value="Moderately Active">Moderately Active (moderate exercise/sports 3-5 days/week)</SelectItem>
                                                 <SelectItem value="Very Active">Very Active (hard exercise/sports 6-7 days a week)</SelectItem>
