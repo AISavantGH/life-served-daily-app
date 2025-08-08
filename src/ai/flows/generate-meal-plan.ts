@@ -33,8 +33,32 @@ const GenerateMealPlanInputSchema = z.object({
 });
 export type GenerateMealPlanInput = z.infer<typeof GenerateMealPlanInputSchema>;
 
+const MealItemSchema = z.object({
+    time: z.string().describe("The time for the meal (e.g., 9 AM)."),
+    menuItems: z.string().describe("The food items for the meal, including portion sizes. Use markdown for lists."),
+    calories: z.number().describe("Estimated calories for the meal."),
+    protein: z.number().describe("Estimated protein in grams for the meal."),
+    carbs: z.number().describe("Estimated carbohydrates in grams for the meal."),
+    fat: z.number().describe("Estimated fat in grams for the meal."),
+});
+
+const MealPlanDaySchema = z.object({
+    day: z.string().describe("The day of the week (e.g., Monday)."),
+    meals: z.array(MealItemSchema).describe("A list of meals and snacks for the day."),
+    totals: z.object({
+        calories: z.number(),
+        protein: z.number(),
+        carbs: z.number(),
+        fat: z.number(),
+    }).describe("Total nutritional information for the day."),
+    dailyRationale: z.string().describe("A brief explanation of why the day's meals meet the user's goals."),
+});
+
 const GenerateMealPlanOutputSchema = z.object({
-  mealPlan: z.string().describe('A detailed meal plan based on the provided dietary restrictions and preferences.'),
+  title: z.string().describe("A catchy title for the meal plan report."),
+  summary: z.string().describe("A brief summary of the meal plan's goals and approach."),
+  nutritionalTargets: z.string().describe("A description of the calorie, protein, carbohydrate, and fat targets. Use markdown for lists."),
+  mealPlan: z.array(MealPlanDaySchema).describe('A detailed 7-day meal plan based on the provided dietary restrictions and preferences.'),
 });
 export type GenerateMealPlanOutput = z.infer<typeof GenerateMealPlanOutputSchema>;
 
@@ -58,31 +82,38 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateMealPlanInputSchema},
   output: {schema: GenerateMealPlanOutputSchema},
     tools: [AvoidUnsafeCombinationsTool],
-  prompt: `You are a meal plan generator. Generate a meal plan for 7 days (Monday to Sunday) based on the user's dietary restrictions and preferences. Include breakfast, lunch, and dinner for each day.
+  prompt: `You are an expert nutritionist and meal planner. Generate a detailed and structured 7-day meal plan report based on the user's profile and preferences. The report must be comprehensive, informative, and encouraging.
 
+  **User Profile and Preferences:**
   {{#if userProfile}}
-  Here is the user's profile for more personalization:
   - Age: {{userProfile.age}}
   - Gender: {{userProfile.gender}}
   - Activity Level: {{userProfile.activityLevel}}
-  {{#if userProfile.location}}- Location: {{userProfile.location}}{{/if}}
-  {{#if userProfile.healthGoals}}
-  - Health Goals: {{#each userProfile.healthGoals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
-  {{/if}}
-  {{#if userProfile.otherHealthGoal}}- Other Health Goal: {{{userProfile.otherHealthGoal}}}{{/if}}
+  {{#if userProfile.location}}- Location: {{userProfile.location}} (Suggest locally available ingredients if relevant){{/if}}
+  - Health Goals: {{#if userProfile.healthGoals}}{{#each userProfile.healthGoals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}Not specified{{/if}}{{#if userProfile.otherHealthGoal}}, {{{userProfile.otherHealthGoal}}}{{/if}}
+  {{else}}
+  No specific user profile provided.
   {{/if}}
 
-  Dietary Restrictions: {{{dietaryRestrictions}}}
+  - Dietary Restrictions: {{{dietaryRestrictions}}}
+  - Meal Preferences:
+    {{#if mealPreferences}}- Cuisines: {{#each mealPreferences}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+    {{#if otherMealPreference}}- Other Preferences: {{{otherMealPreference}}}{{/if}}
+    {{#if favoriteIngredients}}- Favorite Ingredients: {{{favoriteIngredients}}}{{/if}}
+
+  **Instructions for the Output:**
   
-  Meal Preferences:
-  {{#if mealPreferences}}
-  - Cuisines: {{#each mealPreferences}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
-  {{/if}}
-  {{#if otherMealPreference}}- Other Preferences: {{{otherMealPreference}}}{{/if}}
-  {{#if favoriteIngredients}}- Favorite Ingredients: {{{favoriteIngredients}}}{{/if}}
+  1.  **Title and Summary:** Create a title and a brief summary for the meal plan report.
+  2.  **Nutritional Targets:** Define clear daily nutritional targets (calories, protein, carbs, fat). Explain WHY these targets are chosen based on the user's profile and goals.
+  3.  **Detailed 7-Day Plan:** For each of the 7 days (Monday to Sunday):
+      *   Create a full day's menu including breakfast, lunch, dinner, and at least one snack.
+      *   For each meal/snack, provide the time, a detailed description of the menu items with portion sizes, and a breakdown of calories, protein, carbs, and fat.
+      *   Calculate the total calories, protein, carbs, and fat for the day.
+      *   Write a "Daily Rationale" explaining how that day's meals support the user's goals.
+  4.  **Formatting:** Ensure the menu items are in a markdown list for readability.
+  5.  **Tool Use:** Use the \`avoidUnsafeCombinations\` tool to ensure the meal plan is safe.
 
-  Make sure to avoid unsafe food combinations by using the avoidUnsafeCombinations tool.
-  The meal plan should be detailed and easy to follow.
+  Your response must be in the specified JSON format. Be thorough, accurate, and empathetic in your tone.
   `,
 });
 

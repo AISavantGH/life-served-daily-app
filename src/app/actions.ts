@@ -1,9 +1,9 @@
 "use server";
 
-import { generateMealPlan, GenerateMealPlanInput } from "@/ai/flows/generate-meal-plan";
+import { generateMealPlan, GenerateMealPlanInput, GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
 import { generateShoppingList, GenerateShoppingListInput, GenerateShoppingListOutput } from "@/ai/flows/generate-shopping-list";
 
-export async function handleGenerateMealPlan(input: GenerateMealPlanInput) {
+export async function handleGenerateMealPlan(input: GenerateMealPlanInput): Promise<{ success: boolean; data?: GenerateMealPlanOutput; error?: string; }> {
   try {
     const result = await generateMealPlan(input);
     return { success: true, data: result };

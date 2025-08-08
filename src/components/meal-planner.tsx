@@ -33,6 +33,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { getUserProfile, saveUserProfile, UserProfile } from "@/services/user-profile-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter as TableFoot } from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
 
 
 const dietaryRestrictions = [
@@ -88,23 +91,9 @@ const userProfileFormSchema = z.object({
   otherHealthGoal: z.string().optional(),
 });
 
-type MealPlan = {
-  mealPlan: string;
-};
-
-type MealPlanDay = {
-  day: string;
-  meals: {
-    breakfast: string;
-    lunch: string;
-    dinner: string;
-  };
-};
-
 export function MealPlanner() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
-  const [parsedMealPlan, setParsedMealPlan] = useState<MealPlanDay[]>([]);
+  const [mealPlan, setMealPlan] = useState<GenerateMealPlanOutput | null>(null);
   const [shoppingList, setShoppingList] = useState<GenerateShoppingListOutput | null>(null);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
@@ -150,39 +139,6 @@ export function MealPlanner() {
     fetchUserProfile();
   }, [userProfileForm]);
 
-  const parseMealPlan = (plan: string): MealPlanDay[] => {
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    const planDays: MealPlanDay[] = [];
-    const lines = plan.split('\n');
-    let currentDayIndex = -1;
-  
-    lines.forEach(line => {
-      const trimmedLine = line.trim();
-      if (trimmedLine.length === 0) return;
-  
-      const dayMatch = days.find(d => trimmedLine.startsWith(d));
-      if (dayMatch) {
-        currentDayIndex = days.indexOf(dayMatch);
-        if(!planDays[currentDayIndex]) {
-          planDays[currentDayIndex] = {
-            day: dayMatch,
-            meals: { breakfast: '', lunch: '', dinner: '' },
-          };
-        }
-      } else if (currentDayIndex !== -1 && planDays[currentDayIndex]) {
-        if (trimmedLine.toLowerCase().startsWith('breakfast:')) {
-            planDays[currentDayIndex].meals.breakfast = trimmedLine.substring('breakfast:'.length).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('lunch:')) {
-            planDays[currentDayIndex].meals.lunch = trimmedLine.substring('lunch:'.length).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('dinner:')) {
-            planDays[currentDayIndex].meals.dinner = trimmedLine.substring('dinner:'.length).trim();
-        }
-      }
-    });
-  
-    return planDays.filter(p => p);
-  };
-  
   async function onSaveProfile(values: z.infer<typeof userProfileFormSchema>) {
     setIsProfileSaving(true);
     await saveUserProfile(values);
@@ -198,7 +154,6 @@ export function MealPlanner() {
     setIsMealPlanLoading(true);
     setMealPlan(null);
     setShoppingList(null);
-    setParsedMealPlan([]);
     setCheckedItems({});
     
     const combinedDietaryRestrictions = [
@@ -227,7 +182,6 @@ export function MealPlanner() {
 
     if (result.success && result.data) {
       setMealPlan(result.data);
-      setParsedMealPlan(parseMealPlan(result.data.mealPlan));
       toast({
         title: "Meal Plan Generated!",
         description: "Your delicious week awaits.",
@@ -247,7 +201,13 @@ export function MealPlanner() {
     setIsShoppingListLoading(true);
     setShoppingList(null);
     setCheckedItems({});
-    const result = await handleGenerateShoppingList({ mealPlan: mealPlan.mealPlan });
+
+    const mealPlanText = mealPlan.mealPlan.map(day => 
+      `${day.day}:\n${day.meals.map(meal => `${meal.time} - ${meal.menuItems}`).join('\n')}`
+    ).join('\n\n');
+
+
+    const result = await handleGenerateShoppingList({ mealPlan: mealPlanText });
     setIsShoppingListLoading(false);
 
     if (result.success && result.data) {
@@ -593,27 +553,71 @@ export function MealPlanner() {
         </Card>
       )}
 
-      {parsedMealPlan.length > 0 && (
+      {mealPlan && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Your Personal Meal Plan</CardTitle>
+            <CardTitle className="font-headline text-2xl">{mealPlan.title}</CardTitle>
             <CardDescription>
-              Here is a week of delicious meals tailored just for you.
+              {mealPlan.summary}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              {parsedMealPlan.map(plan => (
-                <AccordionItem value={plan.day} key={plan.day}>
-                  <AccordionTrigger className="text-lg font-semibold">{plan.day}</AccordionTrigger>
-                  <AccordionContent className="pl-4 space-y-2">
-                    <p><strong>Breakfast:</strong> {plan.meals.breakfast}</p>
-                    <p><strong>Lunch:</strong> {plan.meals.lunch}</p>
-                    <p><strong>Dinner:</strong> {plan.meals.dinner}</p>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+             <div className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-semibold text-primary mb-2">Nutritional Targets</h3>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{mealPlan.nutritionalTargets}</p>
+                </div>
+                <Separator />
+                <div>
+                    <h3 className="text-xl font-semibold text-primary mb-2">Your 7-Day Plan</h3>
+                     <Accordion type="single" collapsible className="w-full">
+                        {mealPlan.mealPlan.map(plan => (
+                            <AccordionItem value={plan.day} key={plan.day}>
+                            <AccordionTrigger className="text-lg font-semibold">{plan.day}</AccordionTrigger>
+                            <AccordionContent className="pl-2 space-y-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-1/6">Time</TableHead>
+                                            <TableHead className="w-3/6">Menu</TableHead>
+                                            <TableHead className="text-right">Calories</TableHead>
+                                            <TableHead className="text-right">Protein (g)</TableHead>
+                                            <TableHead className="text-right">Carbs (g)</TableHead>
+                                            <TableHead className="text-right">Fat (g)</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {plan.meals.map(meal => (
+                                            <TableRow key={meal.time}>
+                                                <TableCell className="font-medium">{meal.time}</TableCell>
+                                                <TableCell className="whitespace-pre-wrap">{meal.menuItems}</TableCell>
+                                                <TableCell className="text-right">{meal.calories}</TableCell>
+                                                <TableCell className="text-right">{meal.protein}</TableCell>
+                                                <TableCell className="text-right">{meal.carbs}</TableCell>
+                                                <TableCell className="text-right">{meal.fat}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                    <TableFoot>
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="font-bold">Totals</TableCell>
+                                            <TableCell className="text-right font-bold">{plan.totals.calories}</TableCell>
+                                            <TableCell className="text-right font-bold">{plan.totals.protein}</TableCell>
+                                            <TableCell className="text-right font-bold">{plan.totals.carbs}</TableCell>
+                                            <TableCell className="text-right font-bold">{plan.totals.fat}</TableCell>
+                                        </TableRow>
+                                    </TableFoot>
+                                </Table>
+                                <div className="p-4 bg-muted/50 rounded-lg">
+                                    <h4 className="font-semibold mb-1">Why this works for you:</h4>
+                                    <p className="text-sm text-muted-foreground">{plan.dailyRationale}</p>
+                                </div>
+                            </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </div>
+             </div>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
             <Button onClick={onGenerateShoppingList} disabled={isShoppingListLoading} className="w-full">
