@@ -26,11 +26,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { handleGenerateMealPlan, handleGenerateShoppingList } from "@/app/actions";
+import { handleGenerateMealPlan, handleGenerateShoppingList, handleGetUserProfile, handleSaveUserProfile } from "@/app/actions";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { GenerateShoppingListOutput } from "@/ai/flows/generate-shopping-list";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getUserProfile, saveUserProfile, UserProfile } from "@/services/user-profile-service";
+import { UserProfile } from "@/services/user-profile-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
@@ -126,7 +126,7 @@ export function MealPlanner() {
 
   useEffect(() => {
     async function fetchUserProfile() {
-      const profile = await getUserProfile();
+      const profile = await handleGetUserProfile();
       if (profile) {
         setUserProfile(profile);
         userProfileForm.reset({
@@ -141,7 +141,7 @@ export function MealPlanner() {
 
   async function onSaveProfile(values: z.infer<typeof userProfileFormSchema>) {
     setIsProfileSaving(true);
-    await saveUserProfile(values);
+    await handleSaveUserProfile(values);
     setUserProfile(values);
     setIsProfileSaving(false);
     toast({
