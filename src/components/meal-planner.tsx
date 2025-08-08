@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils } from "lucide-react";
+import { BarChart, Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils, Lightbulb, TrendingUp } from "lucide-react";
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,15 +28,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { handleGenerateMealPlan, handleGenerateShoppingList, handleGetUserProfile, handleSaveUserProfile } from "@/app/actions";
+import { handleGenerateMealPlan, handleGenerateShoppingList, handleGetUserProfile, handleSaveUserProfile, handleAnalyzeMealPlan } from "@/app/actions";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserProfile } from "@/services/user-profile-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { GenerateMealPlanOutput, GenerateShoppingListOutput } from "@/ai/schemas";
+import type { GenerateMealPlanOutput, GenerateShoppingListOutput, AnalyzeMealPlanOutput } from "@/ai/schemas";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 
 
 const dietaryRestrictions = [
@@ -90,13 +95,20 @@ const userProfileFormSchema = z.object({
   otherHealthGoal: z.string().optional(),
 });
 
+const analysisFormSchema = z.object({
+    feedback: z.string().min(10, "Please provide at least 10 characters of feedback."),
+});
+
 export function MealPlanner() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [mealPlan, setMealPlan] = useState<GenerateMealPlanOutput | null>(null);
   const [shoppingList, setShoppingList] = useState<GenerateShoppingListOutput | null>(null);
+  const [analysis, setAnalysis] = useState<AnalyzeMealPlanOutput | null>(null);
   const [isMealPlanLoading, setIsMealPlanLoading] = useState(false);
   const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [isProfileSaving, setIsProfileSaving] = useState(false);
+  const [isAnalysisDialogOpen, setIsAnalysisDialogOpen] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
@@ -120,6 +132,13 @@ export function MealPlanner() {
       location: "",
       healthGoals: ["general_health"],
       otherHealthGoal: "",
+    },
+  });
+
+  const analysisForm = useForm<z.infer<typeof analysisFormSchema>>({
+    resolver: zodResolver(analysisFormSchema),
+    defaultValues: {
+        feedback: "",
     },
   });
 
@@ -153,6 +172,7 @@ export function MealPlanner() {
     setIsMealPlanLoading(true);
     setMealPlan(null);
     setShoppingList(null);
+    setAnalysis(null);
     setCheckedItems({});
     
     const combinedDietaryRestrictions = [
@@ -209,6 +229,36 @@ export function MealPlanner() {
             variant: "destructive",
             title: "Uh oh! Something went wrong.",
             description: result.error || "There was a problem generating your shopping list.",
+        });
+    }
+  }
+
+  async function onAnalyzeMealPlan(values: z.infer<typeof analysisFormSchema>) {
+    if (!mealPlan) return;
+    setIsAnalysisLoading(true);
+    setAnalysis(null);
+
+    const result = await handleAnalyzeMealPlan({
+        mealPlan,
+        userFeedback: values.feedback,
+        userProfile: userProfile ?? undefined,
+    });
+    setIsAnalysisLoading(false);
+    setIsAnalysisDialogOpen(false);
+    analysisForm.reset();
+
+
+    if (result.success && result.data) {
+        setAnalysis(result.data);
+        toast({
+            title: "Analysis Complete!",
+            description: "Here are some insights on your meal plan.",
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Analysis Failed.",
+            description: result.error || "There was a problem analyzing your meal plan.",
         });
     }
   }
@@ -448,11 +498,11 @@ export function MealPlanner() {
                                                 <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Sedentary">Sedentary (little or no exercise, e.g., desk job)</SelectItem>
-                                                <SelectItem value="Lightly Active">Lightly Active (light exercise/sports 1-3 days/week)</SelectItem>
-                                                <SelectItem value="Moderately Active">Moderately Active (moderate exercise/sports 3-5 days/week)</SelectItem>
-                                                <SelectItem value="Very Active">Very Active (hard exercise/sports 6-7 days a week)</SelectItem>
-                                                <SelectItem value="Super Active">Super Active (very hard exercise/sports & a physical job)</SelectItem>
+                                                <SelectItem value="Sedentary">Sedentary (e.g., desk job, little to no exercise)</SelectItem>
+                                                <SelectItem value="Lightly Active">Lightly Active (e.g., light exercise/sports 1-3 days/week, walks)</SelectItem>
+                                                <SelectItem value="Moderately Active">Moderately Active (e.g., moderate exercise/sports 3-5 days/week)</SelectItem>
+                                                <SelectItem value="Very Active">Very Active (e.g., hard exercise/sports 6-7 days a week)</SelectItem>
+                                                <SelectItem value="Super Active">Super Active (e.g., very hard exercise & a physical job)</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -622,6 +672,55 @@ export function MealPlanner() {
              </div>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4 p-6">
+             <Dialog open={isAnalysisDialogOpen} onOpenChange={setIsAnalysisDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button variant="secondary" size="lg" className="w-full text-lg">
+                        <TrendingUp className="mr-2 h-5 w-5" />
+                        Analyze My Meal Plan
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Analyze Your Plan</DialogTitle>
+                        <DialogDescription>
+                            How has this past week been? Provide some feedback so we can suggest improvements.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...analysisForm}>
+                        <form onSubmit={analysisForm.handleSubmit(onAnalyzeMealPlan)} className="space-y-4">
+                            <FormField
+                                control={analysisForm.control}
+                                name="feedback"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Your Feedback</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="e.g., I felt low on energy in the afternoons, the dinners were hard to cook, I was still hungry..."
+                                                rows={5}
+                                                {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <DialogFooter>
+                                <Button type="submit" disabled={isAnalysisLoading}>
+                                    {isAnalysisLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Analyzing...
+                                        </>
+                                    ) : (
+                                        "Get Suggestions"
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+
             <Button onClick={onGenerateShoppingList} size="lg" disabled={isShoppingListLoading} className="w-full text-lg">
                 {isShoppingListLoading ? (
                     <>
@@ -637,6 +736,64 @@ export function MealPlanner() {
             </Button>
             <p className="text-xs text-muted-foreground text-center">Enjoy your meals! You can generate a new plan anytime.</p>
           </CardFooter>
+        </Card>
+      )}
+
+      {isAnalysisLoading && (
+        <Card className="w-full animate-pulse">
+          <CardHeader>
+            <div className="h-8 w-1/2 rounded-md bg-muted" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="h-4 w-full rounded-md bg-muted" />
+            <div className="h-4 w-5/6 rounded-md bg-muted" />
+            <div className="h-24 w-full rounded-md bg-muted" />
+          </CardContent>
+        </Card>
+      )}
+
+      {analysis && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-3xl flex items-center gap-3 font-headline"><Lightbulb /> Meal Plan Analysis</CardTitle>
+                <CardDescription>
+                    {analysis.analysis}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-semibold mb-3 text-primary">Actionable Suggestions</h3>
+                    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                        {analysis.suggestions.map((suggestion, index) => (
+                            <li key={index}>{suggestion}</li>
+                        ))}
+                    </ul>
+                </div>
+                <Separator />
+                <div>
+                    <h3 className="text-xl font-semibold mb-1 text-primary">Nutritional Consistency</h3>
+                    <div className="flex items-center gap-4">
+                        <Progress value={analysis.consistencyScore} className="w-1/2" />
+                        <span className="text-lg font-bold">{analysis.consistencyScore}/100</span>
+                    </div>
+                     <p className="text-sm text-muted-foreground mt-2">{analysis.consistencyRationale}</p>
+                    <div className="h-64 mt-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={mealPlan?.mealPlan.map(p => p.totals)}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="day" tickFormatter={(value, index) => mealPlan?.mealPlan[index].day.substring(0,3) ?? ''} />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="calories" fill="var(--color-chart-1)" />
+                                <Bar dataKey="protein" fill="var(--color-chart-2)" />
+                                <Bar dataKey="carbs" fill="var(--color-chart-3)" />
+                                <Bar dataKey="fat" fill="var(--color-chart-4)" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </CardContent>
         </Card>
       )}
 

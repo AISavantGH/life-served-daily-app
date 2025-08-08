@@ -73,3 +73,19 @@ export const GenerateShoppingListOutputSchema = z.object({
   shoppingList: z.array(ShoppingListCategorySchema).describe('A shopping list organized by category (e.g., Produce, Dairy, Meat, Pantry).'),
 });
 export type GenerateShoppingListOutput = z.infer<typeof GenerateShoppingListOutputSchema>;
+
+// Schemas for Analyze Meal Plan Flow
+export const AnalyzeMealPlanInputSchema = z.object({
+    mealPlan: GenerateMealPlanOutputSchema.describe('The meal plan to be analyzed.'),
+    userFeedback: z.string().describe("The user's feedback on the meal plan."),
+    userProfile: UserProfileSchema.optional().describe("The user's health profile."),
+});
+export type AnalyzeMealPlanInput = z.infer<typeof AnalyzeMealPlanInputSchema>;
+
+export const AnalyzeMealPlanOutputSchema = z.object({
+    analysis: z.string().describe("A brief analysis of the meal plan based on user feedback and goals."),
+    suggestions: z.array(z.string()).describe("A list of actionable suggestions for the next meal plan."),
+    consistencyScore: z.number().describe("A score from 0-100 indicating how consistent the daily nutritional totals are."),
+    consistencyRationale: z.string().describe("A brief explanation for the consistency score."),
+});
+export type AnalyzeMealPlanOutput = z.infer<typeof AnalyzeMealPlanOutputSchema>;
