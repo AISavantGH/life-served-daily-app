@@ -3,28 +3,10 @@
  * @fileOverview This file defines a Genkit flow for generating a shopping list from a meal plan.
  *
  * - generateShoppingList - A function that generates a shopping list.
- * - GenerateShoppingListInput - The input type for the generateShoppingList function.
- * - GenerateShoppingListOutput - The return type for the generateShoppingList function.
  */
 
 import { ai } from '@/ai/genkit';
-import { GenerateMealPlanOutputSchema } from '@/ai/flows/generate-meal-plan';
-import { z } from 'genkit';
-
-export const GenerateShoppingListInputSchema = z.object({
-  mealPlan: GenerateMealPlanOutputSchema.describe('The structured meal plan to generate a shopping list for.'),
-});
-export type GenerateShoppingListInput = z.infer<typeof GenerateShoppingListInputSchema>;
-
-const ShoppingListCategorySchema = z.object({
-  category: z.string().describe("The category of the shopping list items (e.g., 'Produce', 'Dairy')."),
-  items: z.array(z.string()).describe("The items in this category."),
-});
-
-const GenerateShoppingListOutputSchema = z.object({
-  shoppingList: z.array(ShoppingListCategorySchema).describe('A shopping list organized by category (e.g., Produce, Dairy, Meat, Pantry).'),
-});
-export type GenerateShoppingListOutput = z.infer<typeof GenerateShoppingListOutputSchema>;
+import { GenerateShoppingListInputSchema, GenerateShoppingListOutputSchema, type GenerateShoppingListInput, type GenerateShoppingListOutput } from '@/ai/schemas';
 
 export async function generateShoppingList(input: GenerateShoppingListInput): Promise<GenerateShoppingListOutput> {
   return generateShoppingListFlow(input);

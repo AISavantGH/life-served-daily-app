@@ -1,8 +1,9 @@
 "use server";
 
-import { generateMealPlan, GenerateMealPlanInput, GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
-import { generateShoppingList, GenerateShoppingListInput, GenerateShoppingListOutput } from "@/ai/flows/generate-shopping-list";
+import { generateMealPlan } from "@/ai/flows/generate-meal-plan";
+import { generateShoppingList } from "@/ai/flows/generate-shopping-list";
 import { getUserProfile, saveUserProfile, UserProfile } from "@/services/user-profile-service";
+import type { GenerateMealPlanInput, GenerateMealPlanOutput, GenerateShoppingListInput, GenerateShoppingListOutput } from "@/ai/schemas";
 
 export async function handleGenerateMealPlan(input: GenerateMealPlanInput): Promise<{ success: boolean; data?: GenerateMealPlanOutput; error?: string; }> {
   try {

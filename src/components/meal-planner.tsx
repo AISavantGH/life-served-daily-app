@@ -28,12 +28,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { handleGenerateMealPlan, handleGenerateShoppingList, handleGetUserProfile, handleSaveUserProfile } from "@/app/actions";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { GenerateShoppingListOutput } from "@/ai/flows/generate-shopping-list";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserProfile } from "@/services/user-profile-service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { GenerateMealPlanOutput } from "@/ai/flows/generate-meal-plan";
+import type { GenerateMealPlanOutput, GenerateShoppingListOutput } from "@/ai/schemas";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 
