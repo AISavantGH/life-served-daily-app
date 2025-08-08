@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BarChart, Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils, Lightbulb, TrendingUp } from "lucide-react";
+import { BarChart, Ban, Heart, Loader2, Sparkles, ShoppingCart, User, Target, Leaf, WheatOff, MilkOff, Shell, Sprout, Utensils, Lightbulb, TrendingUp, ThumbsDown } from "lucide-react";
 import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
@@ -66,7 +66,8 @@ const mealPlannerFormSchema = z.object({
   mealPreferences: z.array(z.string()).optional(),
   otherMealPreference: z.string().optional(),
   favoriteIngredients: z.string().optional(),
-}).refine(data => (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) || (data.otherDietaryRestrictions && data.otherDietaryRestrictions.trim().length > 0) || (data.mealPreferences && data.mealPreferences.length > 0) || (data.otherMealPreference && data.otherMealPreference.trim().length > 0) || (data.favoriteIngredients && data.favoriteIngredients.trim().length > 0), {
+  dislikedIngredients: z.string().optional(),
+}).refine(data => (data.dietaryRestrictions && data.dietaryRestrictions.length > 0) || (data.otherDietaryRestrictions && data.otherDietaryRestrictions.trim().length > 0) || (data.mealPreferences && data.mealPreferences.length > 0) || (data.otherMealPreference && data.otherMealPreference.trim().length > 0) || (data.favoriteIngredients && data.favoriteIngredients.trim().length > 0) || (data.dislikedIngredients && data.dislikedIngredients.trim().length > 0), {
     message: "Please select at least one preference or restriction.",
     path: ["mealPreferences"],
 });
@@ -117,6 +118,7 @@ export function MealPlanner() {
       mealPreferences: [],
       otherMealPreference: "",
       favoriteIngredients: "",
+      dislikedIngredients: "",
     },
   });
 
@@ -185,6 +187,7 @@ export function MealPlanner() {
         mealPreferences: values.mealPreferences,
         otherMealPreference: values.otherMealPreference,
         favoriteIngredients: values.favoriteIngredients,
+        dislikedIngredients: values.dislikedIngredients,
         userProfile: userProfile ?? undefined 
     });
 
@@ -359,12 +362,28 @@ export function MealPlanner() {
                     name="favoriteIngredients"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-base">Favorite Ingredients</FormLabel>
+                            <FormLabel className="text-base flex items-center gap-2"><Sparkles className="h-5 w-5 text-accent" />Favorite Ingredients</FormLabel>
                             <FormControl>
                                 <Input placeholder="e.g., Tomatoes, Basil, Chicken" {...field} />
                             </FormControl>
                             <FormDescription>
                                 List some ingredients you'd love for us to include.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={mealPlannerForm.control}
+                    name="dislikedIngredients"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-base flex items-center gap-2"><ThumbsDown className="h-5 w-5 text-destructive" />Disliked Ingredients</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Olives, Cilantro, Mushrooms" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                                Tell us what to leave out of your meal plan.
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -497,10 +516,10 @@ export function MealPlanner() {
                                                 <SelectTrigger><SelectValue placeholder="Select your activity level" /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Sedentary">Sedentary (e.g., desk job, little to no exercise)</SelectItem>
-                                                <SelectItem value="Lightly Active">Lightly Active (e.g., light exercise/sports 1-3 days/week, walks)</SelectItem>
-                                                <SelectItem value="Moderately Active">Moderately Active (e.g., moderate exercise/sports 3-5 days/week)</SelectItem>
-                                                <SelectItem value="Very Active">Very Active (e.g., hard exercise/sports 6-7 days a week)</SelectItem>
+                                                <SelectItem value="Sedentary">Sedentary (e.g., desk job with little to no exercise)</SelectItem>
+                                                <SelectItem value="Lightly Active">Lightly Active (e.g., light exercise 1-3 days/week, walks, active hobbies)</SelectItem>
+                                                <SelectItem value="Moderately Active">Moderately Active (e.g., moderate exercise 3-5 days/week)</SelectItem>
+                                                <SelectItem value="Very Active">Very Active (e.g., hard exercise 6-7 days a week)</SelectItem>
                                                 <SelectItem value="Super Active">Super Active (e.g., very hard exercise & a physical job)</SelectItem>
                                             </SelectContent>
                                         </Select>

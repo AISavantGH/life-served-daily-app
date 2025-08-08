@@ -50,6 +50,8 @@ const prompt = ai.definePrompt({
     {{#if mealPreferences}}- Cuisines: {{#each mealPreferences}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
     {{#if otherMealPreference}}- Other Preferences: {{{otherMealPreference}}}{{/if}}
     {{#if favoriteIngredients}}- Favorite Ingredients: {{{favoriteIngredients}}}{{/if}}
+    {{#if dislikedIngredients}}- Disliked Ingredients: {{{dislikedIngredients}}} (Strictly avoid including these ingredients).{{/if}}
+
 
   **Instructions for the Output:**
   

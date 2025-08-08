@@ -24,6 +24,7 @@ export const GenerateMealPlanInputSchema = z.object({
     .describe('A list of preferred cuisines.'),
   otherMealPreference: z.string().optional().describe("Other specific meal preference provided by the user."),
   favoriteIngredients: z.string().optional().describe("A comma-separated list of favorite ingredients."),
+  dislikedIngredients: z.string().optional().describe("A comma-separated list of ingredients to avoid."),
   userProfile: UserProfileSchema.optional().describe("The user's health profile."),
 });
 export type GenerateMealPlanInput = z.infer<typeof GenerateMealPlanInputSchema>;
