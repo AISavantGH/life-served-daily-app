@@ -225,7 +225,7 @@ export function MealPlanner() {
 
   return (
     <div className="container mx-auto max-w-4xl space-y-8">
-      <Card className="shadow-lg border-none">
+      <Card>
         <Tabs defaultValue="meal-plan">
           <TabsList className="grid w-full grid-cols-2 h-12">
             <TabsTrigger value="meal-plan" className="text-base"><Utensils className="mr-2" />Meal Planner</TabsTrigger>
@@ -233,7 +233,7 @@ export function MealPlanner() {
           </TabsList>
           <TabsContent value="meal-plan">
             <CardHeader>
-              <CardTitle className="font-headline text-3xl">Craft Your Perfect Meal Plan</CardTitle>
+              <CardTitle className="text-3xl">Craft Your Perfect Meal Plan</CardTitle>
               <CardDescription className="text-base">
                 Your tastes, your needs, your week. Let&apos;s get cooking.
               </CardDescription>
@@ -247,7 +247,7 @@ export function MealPlanner() {
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                            <FormLabel className="flex items-center gap-2 text-xl font-semibold font-headline">
+                            <FormLabel className="flex items-center gap-2 text-xl font-semibold">
                                 <Ban className="h-6 w-6 text-destructive" />
                                 Dietary Restrictions
                             </FormLabel>
@@ -316,7 +316,7 @@ export function MealPlanner() {
                     render={() => (
                         <FormItem>
                             <div className="mb-4">
-                                <FormLabel className="flex items-center gap-2 text-xl font-semibold font-headline">
+                                <FormLabel className="flex items-center gap-2 text-xl font-semibold">
                                     <Heart className="h-6 w-6 text-primary" />
                                     Meal Preferences
                                 </FormLabel>
@@ -411,7 +411,7 @@ export function MealPlanner() {
           </TabsContent>
           <TabsContent value="profile">
             <CardHeader>
-                <CardTitle className="font-headline text-3xl flex items-center gap-3">Your Health Profile</CardTitle>
+                <CardTitle className="text-3xl flex items-center gap-3">Your Health Profile</CardTitle>
                 <CardDescription className="text-base">
                     This information helps us create a highly personalized and effective meal plan for you.
                 </CardDescription>
@@ -420,7 +420,7 @@ export function MealPlanner() {
                 <Form {...userProfileForm}>
                     <form onSubmit={userProfileForm.handleSubmit(onSaveProfile)} className="space-y-8">
                         <div>
-                            <h3 className="text-xl font-semibold font-headline text-primary mb-4 flex items-center gap-2"><User /> Personal Details</h3>
+                            <h3 className="text-xl font-semibold text-primary mb-4 flex items-center gap-2"><User /> Personal Details</h3>
                             <div className="space-y-4">
                                 <FormField control={userProfileForm.control} name="age" render={({ field }) => (
                                     <FormItem><FormLabel className="text-base">Age</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
@@ -467,7 +467,7 @@ export function MealPlanner() {
                         </div>
                         <Separator />
                         <div>
-                        <h3 className="text-xl font-semibold font-headline text-primary mb-4 flex items-center gap-2"><Target className="h-6 w-6" />Health Goals</h3>
+                        <h3 className="text-xl font-semibold text-primary mb-4 flex items-center gap-2"><Target className="h-6 w-6" />Health Goals</h3>
                             <FormField
                                 control={userProfileForm.control}
                                 name="healthGoals"
@@ -539,7 +539,7 @@ export function MealPlanner() {
       </Card>
 
       {isMealPlanLoading && (
-        <Card className="shadow-lg w-full">
+        <Card className="w-full">
             <CardHeader>
                 <div className="h-8 w-3/4 rounded-md bg-muted" />
             </CardHeader>
@@ -558,9 +558,9 @@ export function MealPlanner() {
       )}
 
       {mealPlan && (
-        <Card className="shadow-lg w-full">
+        <Card className="w-full">
           <CardHeader>
-            <CardTitle className="font-headline text-3xl">{mealPlan.title}</CardTitle>
+            <CardTitle className="text-3xl">{mealPlan.title}</CardTitle>
             <CardDescription className="text-base">
               {mealPlan.summary}
             </CardDescription>
@@ -568,16 +568,16 @@ export function MealPlanner() {
           <CardContent>
              <div className="space-y-6">
                 <div>
-                    <h3 className="text-2xl font-semibold font-headline text-primary mb-2">Nutritional Targets</h3>
+                    <h3 className="text-2xl font-semibold text-primary mb-2">Nutritional Targets</h3>
                     <p className="text-base text-muted-foreground whitespace-pre-wrap">{mealPlan.nutritionalTargets}</p>
                 </div>
                 <Separator />
                 <div>
-                    <h3 className="text-2xl font-semibold font-headline text-primary mb-2">Your 7-Day Plan</h3>
+                    <h3 className="text-2xl font-semibold text-primary mb-2">Your 7-Day Plan</h3>
                      <Accordion type="single" collapsible className="w-full" defaultValue={mealPlan.mealPlan[0]?.day}>
                         {mealPlan.mealPlan.map(plan => (
                             <AccordionItem value={plan.day} key={plan.day}>
-                            <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline">{plan.day}</AccordionTrigger>
+                            <AccordionTrigger className="text-xl font-semibold hover:no-underline">{plan.day}</AccordionTrigger>
                             <AccordionContent className="pl-2 space-y-4">
                                 <Table>
                                     <TableHeader>
@@ -603,7 +603,7 @@ export function MealPlanner() {
                                         ))}
                                     </TableBody>
                                     <TableFooter>
-                                        <TableRow className="bg-muted/50">
+                                        <TableRow>
                                             <TableCell colSpan={2} className="font-bold">Totals</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.calories}</TableCell>
                                             <TableCell className="text-right font-bold">{plan.totals.protein}</TableCell>
@@ -643,7 +643,7 @@ export function MealPlanner() {
       )}
 
       {isShoppingListLoading && (
-        <Card className="shadow-lg w-full animate-pulse">
+        <Card className="w-full animate-pulse">
             <CardHeader>
                 <div className="h-8 w-3/4 rounded-md bg-muted" />
             </CardHeader>
@@ -656,9 +656,9 @@ export function MealPlanner() {
       )}
 
       {shoppingList && (
-        <Card className="shadow-lg w-full">
+        <Card className="w-full">
           <CardHeader>
-            <CardTitle className="font-headline text-3xl flex items-center gap-3"><ShoppingCart/> Your Shopping List</CardTitle>
+            <CardTitle className="text-3xl flex items-center gap-3"><ShoppingCart/> Your Shopping List</CardTitle>
             <CardDescription className="text-base">
               Here&apos;s everything you need for your week of delicious meals. Check them off as you shop!
             </CardDescription>
@@ -666,7 +666,7 @@ export function MealPlanner() {
           <CardContent className="space-y-6">
             {shoppingList.shoppingList.map((category) => (
               <div key={category.category}>
-                <h3 className="text-xl font-semibold font-headline mb-3 border-b pb-2">{category.category}</h3>
+                <h3 className="text-xl font-semibold mb-3 border-b pb-2">{category.category}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                   {category.items.map((item) => (
                     <div key={item} className="flex items-center space-x-3">
