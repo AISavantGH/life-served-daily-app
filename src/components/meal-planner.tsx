@@ -247,10 +247,10 @@ export function MealPlanner() {
                         <div className="mb-4">
                             <FormLabel className="flex items-center gap-2 text-xl font-semibold">
                                 <Ban className="h-6 w-6 text-destructive" />
-                                Dietary Restrictions
+                                Dietary Profile & Restrictions
                             </FormLabel>
                             <FormDescription className="mt-1 text-base">
-                                Tell us what to avoid. Select any that apply to you.
+                                Let us know your dietary needs. Select all that apply.
                             </FormDescription>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
