@@ -1,10 +1,8 @@
-import { MealPlanner } from "@/components/meal-planner";
-
-
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
-      <MealPlanner />
+    <main>
+      <h1>Hello World</h1>
+      <p>If you see this, the basic routing is working.</p>
     </main>
   );
 }
